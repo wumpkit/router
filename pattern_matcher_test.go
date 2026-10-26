@@ -115,13 +115,11 @@ func TestRouter_ButtonCommandWithHTTPPathParams(t *testing.T) {
 		ButtonCommandConfig: ButtonCommandConfig{
 			CustomID: "Hello/{world}",
 		},
-		runFunc: func(ctx Context) error {
+		runFunc: func(ctx *ButtonCommandContext) error {
 			buttonExecuted = true
-			if bCtx, ok := ctx.(*ButtonCommandContext); ok {
-				receivedPattern = bCtx.MatchedPattern()
-				receivedParam = bCtx.Param("world")
-				receivedWorld = bCtx.Param("WORLD")
-			}
+			receivedPattern = ctx.MatchedPattern()
+			receivedParam = ctx.Param("world")
+			receivedWorld = ctx.Param("WORLD")
 			return nil
 		},
 	}
@@ -155,12 +153,10 @@ func TestRouter_ButtonCommand_MultiParam(t *testing.T) {
 		ButtonCommandConfig: ButtonCommandConfig{
 			CustomID: "hello/{World}/foo/{Bar}",
 		},
-		runFunc: func(ctx Context) error {
+		runFunc: func(ctx *ButtonCommandContext) error {
 			buttonExecuted = true
-			if bCtx, ok := ctx.(*ButtonCommandContext); ok {
-				receivedWorld = bCtx.Param("World")
-				receivedBar = bCtx.Param("Bar")
-			}
+			receivedWorld = ctx.Param("World")
+			receivedBar = ctx.Param("Bar")
 			return nil
 		},
 	}
@@ -193,12 +189,10 @@ func TestRouter_SelectMenuCommandWithHTTPPathParams(t *testing.T) {
 		SelectMenuCommandConfig: SelectMenuCommandConfig{
 			CustomID: "menus/{menu_name}/select",
 		},
-		runFunc: func(ctx Context) error {
+		runFunc: func(ctx *SelectMenuCommandContext) error {
 			selectExecuted = true
-			if sCtx, ok := ctx.(*SelectMenuCommandContext); ok {
-				receivedMenu = sCtx.Param("menu_name")
-				receivedValues = sCtx.Values()
-			}
+			receivedMenu = ctx.Param("menu_name")
+			receivedValues = ctx.Values()
 			return nil
 		},
 	}
@@ -232,12 +226,10 @@ func TestRouter_ModalCommandWithHTTPPathParams(t *testing.T) {
 		ModalCommandConfig: ModalCommandConfig{
 			CustomID: "feedback/{category}/submit",
 		},
-		runFunc: func(ctx Context) error {
+		runFunc: func(ctx *ModalCommandContext) error {
 			modalExecuted = true
-			if mCtx, ok := ctx.(*ModalCommandContext); ok {
-				receivedID = mCtx.Param("category")
-				receivedInput = mCtx.InputValue("details")
-			}
+			receivedID = ctx.Param("category")
+			receivedInput = ctx.InputValue("details")
 			return nil
 		},
 	}

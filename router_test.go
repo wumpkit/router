@@ -251,11 +251,9 @@ func TestRouter_ComponentRouting(t *testing.T) {
 		ButtonCommandConfig: ButtonCommandConfig{
 			CustomID: "ticket:create",
 		},
-		runFunc: func(ctx Context) error {
+		runFunc: func(ctx *ButtonCommandContext) error {
 			buttonHandled = true
-			if bCtx, ok := ctx.(*ButtonCommandContext); ok {
-				receivedCustomID = bCtx.CustomID()
-			}
+			receivedCustomID = ctx.CustomID()
 			return nil
 		},
 	}
@@ -265,11 +263,9 @@ func TestRouter_ComponentRouting(t *testing.T) {
 		SelectMenuCommandConfig: SelectMenuCommandConfig{
 			CustomID: "role:select",
 		},
-		runFunc: func(ctx Context) error {
+		runFunc: func(ctx *SelectMenuCommandContext) error {
 			selectMenuHandled = true
-			if sCtx, ok := ctx.(*SelectMenuCommandContext); ok {
-				receivedValues = sCtx.Values()
-			}
+			receivedValues = ctx.Values()
 			return nil
 		},
 	}
@@ -279,7 +275,7 @@ func TestRouter_ComponentRouting(t *testing.T) {
 		ModalCommandConfig: ModalCommandConfig{
 			CustomID: "feedback:modal",
 		},
-		runFunc: func(ctx Context) error {
+		runFunc: func(ctx *ModalCommandContext) error {
 			modalHandled = true
 			return nil
 		},
@@ -334,7 +330,7 @@ func TestRouter_ComponentInteractionErrorLogging(t *testing.T) {
 		ButtonCommandConfig: ButtonCommandConfig{
 			CustomID: "fail-btn",
 		},
-		runFunc: func(ctx Context) error {
+		runFunc: func(ctx *ButtonCommandContext) error {
 			return errors.New("button failure")
 		},
 	}
@@ -354,7 +350,7 @@ func TestRouter_ComponentInteractionErrorLogging(t *testing.T) {
 		SelectMenuCommandConfig: SelectMenuCommandConfig{
 			CustomID: "fail-select",
 		},
-		runFunc: func(ctx Context) error {
+		runFunc: func(ctx *SelectMenuCommandContext) error {
 			return errors.New("select menu failure")
 		},
 	}
@@ -374,7 +370,7 @@ func TestRouter_ComponentInteractionErrorLogging(t *testing.T) {
 		ModalCommandConfig: ModalCommandConfig{
 			CustomID: "fail-modal",
 		},
-		runFunc: func(ctx Context) error {
+		runFunc: func(ctx *ModalCommandContext) error {
 			return errors.New("modal failure")
 		},
 	}
@@ -693,11 +689,9 @@ func TestRouter_UserContextMenuCommand(t *testing.T) {
 		UserContextMenuCommandConfig: UserContextMenuCommandConfig{
 			Name: "InspectUser",
 		},
-		runFunc: func(ctx Context) error {
+		runFunc: func(ctx *UserContextMenuCommandContext) error {
 			executed = true
-			if uCtx, ok := ctx.(*UserContextMenuCommandContext); ok {
-				receivedTarget = uCtx.TargetUser()
-			}
+			receivedTarget = ctx.TargetUser()
 			return nil
 		},
 	}
@@ -757,11 +751,9 @@ func TestRouter_MessageContextMenuCommand(t *testing.T) {
 		MessageContextMenuCommandConfig: MessageContextMenuCommandConfig{
 			Name: "QuoteMessage",
 		},
-		runFunc: func(ctx Context) error {
+		runFunc: func(ctx *MessageContextMenuCommandContext) error {
 			executed = true
-			if mCtx, ok := ctx.(*MessageContextMenuCommandContext); ok {
-				receivedMessage = mCtx.TargetMessage()
-			}
+			receivedMessage = ctx.TargetMessage()
 			return nil
 		},
 	}

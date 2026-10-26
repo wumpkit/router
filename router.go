@@ -147,77 +147,68 @@ func (r *Router) CommandErrorHandler() CommandErrorHandler {
 	return r.errorHandler
 }
 
-// Use appends middlewares to the execution pipeline.
-func (r *Router) Use(middlewares ...Middleware) *Router {
+// use appends middlewares to the execution pipeline
+func (r *Router) Use(middlewares ...Middleware) {
 	r.middlewares = append(r.middlewares, middlewares...)
-	return r
 }
 
-// MustRegisterCommand registers a chat command and panics if registration fails.
-func (r *Router) MustRegisterCommand(cmd ChatCommand) *Router {
+// mustregistercommand registers a chat command and panics if registration fails
+func (r *Router) MustRegisterCommand(cmd ChatCommand) {
 	if err := r.RegisterCommand(cmd); err != nil {
 		panic(err)
 	}
-	return r
 }
 
-// MustRegisterUserContextMenuCommand registers a user context menu command and panics if registration fails.
-func (r *Router) MustRegisterUserContextMenuCommand(cmd UserContextMenuCommand) *Router {
+// mustregisterusercontextmenucommand registers a user context menu command and panics if registration fails
+func (r *Router) MustRegisterUserContextMenuCommand(cmd UserContextMenuCommand) {
 	if err := r.RegisterUserContextMenuCommand(cmd); err != nil {
 		panic(err)
 	}
-	return r
 }
 
-// MustRegisterMessageContextMenuCommand registers a message context menu command and panics if registration fails.
-func (r *Router) MustRegisterMessageContextMenuCommand(cmd MessageContextMenuCommand) *Router {
+// mustregistermessagecontextmenucommand registers a message context menu command and panics if registration fails
+func (r *Router) MustRegisterMessageContextMenuCommand(cmd MessageContextMenuCommand) {
 	if err := r.RegisterMessageContextMenuCommand(cmd); err != nil {
 		panic(err)
 	}
-	return r
 }
 
-// MustRegisterButtonCommand registers a button command and panics if registration fails.
-func (r *Router) MustRegisterButtonCommand(cmd ButtonCommand) *Router {
+// mustregisterbuttoncommand registers a button command and panics if registration fails
+func (r *Router) MustRegisterButtonCommand(cmd ButtonCommand) {
 	if err := r.RegisterButtonCommand(cmd); err != nil {
 		panic(err)
 	}
-	return r
 }
 
-// MustRegisterSelectMenuCommand registers a select menu command and panics if registration fails.
-func (r *Router) MustRegisterSelectMenuCommand(cmd SelectMenuCommand) *Router {
+// mustregisterselectmenucommand registers a select menu command and panics if registration fails
+func (r *Router) MustRegisterSelectMenuCommand(cmd SelectMenuCommand) {
 	if err := r.RegisterSelectMenuCommand(cmd); err != nil {
 		panic(err)
 	}
-	return r
 }
 
-// MustRegisterModalCommand registers a modal command and panics if registration fails.
-func (r *Router) MustRegisterModalCommand(cmd ModalCommand) *Router {
+// mustregistermodalcommand registers a modal command and panics if registration fails
+func (r *Router) MustRegisterModalCommand(cmd ModalCommand) {
 	if err := r.RegisterModalCommand(cmd); err != nil {
 		panic(err)
 	}
-	return r
 }
 
-// MustRegisterAlias associates an alias with a registered command and panics on error.
-func (r *Router) MustRegisterAlias(alias string, target string) *Router {
+// mustregisteralias associates an alias with a registered command and panics on error
+func (r *Router) MustRegisterAlias(alias string, target string) {
 	if err := r.RegisterAlias(alias, target); err != nil {
 		panic(err)
 	}
-	return r
 }
 
-// MustRegisterCategory registers a category and panics if registration fails.
-func (r *Router) MustRegisterCategory(cat *Category) *Router {
+// mustregistercategory registers a category and panics if registration fails
+func (r *Router) MustRegisterCategory(cat *Category) {
 	if err := r.RegisterCategory(cat); err != nil {
 		panic(err)
 	}
-	return r
 }
 
-// AutoRegister attaches event handlers to the wumpkit Client.
+// autoregister attaches event handlers to the wumpkit client
 func (r *Router) AutoRegister() {
 	if r.client == nil {
 		return
@@ -232,102 +223,33 @@ func (r *Router) AutoRegister() {
 }
 
 // attach attaches router listeners to the client
-func (r *Router) Attach(client *wumpkit.Client) *Router {
+func (r *Router) Attach(client *wumpkit.Client) {
 	if client != nil {
 		r.client = client
 	}
 	r.AutoRegister()
-	return r
 }
 
-// autoSync automatically synchronizes application commands on ready
-func (r *Router) AutoSync(appID wumpkit.Snowflake, devGuildIDs ...wumpkit.Snowflake) *Router {
+// autosync automatically synchronizes application commands on ready
+func (r *Router) AutoSync(appID wumpkit.Snowflake, devGuildIDs ...wumpkit.Snowflake) {
 	if r.client == nil {
-		return r
+		return
 	}
 	r.client.OnReady(func(ctx context.Context, _ wumpkit.ReadyEvent) {
 		if err := r.SyncApplicationCommands(ctx, appID, devGuildIDs...); err != nil && r.logger != nil {
 			r.logger.Error("failed syncing application commands", "error", err)
 		}
 	})
-	return r
 }
 
 // before registers hooks running before command execution
-func (r *Router) Before(hooks ...HookFunc) *Router {
+func (r *Router) Before(hooks ...HookFunc) {
 	r.beforeHooks = append(r.beforeHooks, hooks...)
-	return r
 }
 
 // after registers hooks running after command execution
-func (r *Router) After(hooks ...AfterHookFunc) *Router {
+func (r *Router) After(hooks ...AfterHookFunc) {
 	r.afterHooks = append(r.afterHooks, hooks...)
-	return r
-}
-
-// on registers a functional chat command
-func (r *Router) On(name string, handler ChatCommandHandler, opts ...CommandOption) *Router {
-	cfg := ChatCommandConfig{Name: name}
-	for _, opt := range opts {
-		opt(&cfg)
-	}
-	r.MustRegisterCommand(NewFuncChatCommand(cfg, handler))
-	return r
-}
-
-// command registers a functional chat command
-func (r *Router) Command(name string, handler ChatCommandHandler, opts ...CommandOption) *Router {
-	return r.On(name, handler, opts...)
-}
-
-// onButton registers a functional button component handler
-func (r *Router) OnButton(pattern string, handler ButtonHandler, opts ...ButtonOption) *Router {
-	cfg := ButtonCommandConfig{CustomID: pattern}
-	for _, opt := range opts {
-		opt(&cfg)
-	}
-	r.MustRegisterButtonCommand(NewFuncButtonCommand(cfg, handler))
-	return r
-}
-
-// onSelectMenu registers a functional select menu component handler
-func (r *Router) OnSelectMenu(pattern string, handler SelectMenuHandler, opts ...SelectMenuOption) *Router {
-	cfg := SelectMenuCommandConfig{CustomID: pattern}
-	for _, opt := range opts {
-		opt(&cfg)
-	}
-	r.MustRegisterSelectMenuCommand(NewFuncSelectMenuCommand(cfg, handler))
-	return r
-}
-
-// onModal registers a functional modal submission handler
-func (r *Router) OnModal(pattern string, handler ModalHandler, opts ...ModalOption) *Router {
-	cfg := ModalCommandConfig{CustomID: pattern}
-	for _, opt := range opts {
-		opt(&cfg)
-	}
-	r.MustRegisterModalCommand(NewFuncModalCommand(cfg, handler))
-	return r
-}
-
-// onUserContextMenu registers a functional user context menu handler
-func (r *Router) OnUserContextMenu(name string, handler UserContextMenuHandler, guildID ...wumpkit.Snowflake) *Router {
-	cfg := UserContextMenuCommandConfig{Name: name}
-	if len(guildID) > 0 {
-		cfg.GuildID = &guildID[0]
-	}
-	r.MustRegisterUserContextMenuCommand(NewFuncUserContextMenuCommand(cfg, handler))
-	return r
-}
-
-// onMessageContextMenu registers a functional message context menu handler
-func (r *Router) OnMessageContextMenu(name string, handler MessageContextMenuHandler, guildID ...wumpkit.Snowflake) *Router {
-	cfg := MessageContextMenuCommandConfig{Name: name}
-	if len(guildID) > 0 {
-		cfg.GuildID = &guildID[0]
-	}
-	r.MustRegisterMessageContextMenuCommand(NewFuncMessageContextMenuCommand(cfg, handler))
-	return r
 }
 
 // HandleMessage handles an incoming chat message event.

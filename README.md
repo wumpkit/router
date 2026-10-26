@@ -8,14 +8,16 @@
 
 A high-performance, idiomatic command and interaction routing engine for **[Wumpkit](https://github.com/wumpkit-go/wumpkit)**.
 
+> Requires **Go 1.25+**
+
 ## Highlights
 
-- **Typed Commands & Functional Handlers**: Define commands cleanly using Go structs and types or inline functional handlers (`r.Command`, `r.OnButton`, `r.OnSelectMenu`, `r.OnModal`, `r.OnUserContextMenu`, `r.OnMessageContextMenu`). No builder pattern clutter.
+- **Type-Defined Commands**: Define commands as idiomatic Go types and structs. No builder patterns, no functional wrapper bloat.
+- **Strongly Typed Contexts**: Each command interface accepts its concrete context directly (`*ButtonCommandContext`, `*SelectMenuCommandContext`, etc.) eliminating manual type assertions.
 - **Zero-Allocation Routing Fast Paths**: Zero-alloc ASCII path segmentation and sub-microsecond component lookup.
-- **Parameterized Component Routing**: Route buttons, menus, and modals with route parameters (`ticket/:id`, `user/:action/:id`) and retrieve parsed parameters via `ctx.Params()`.
-- **Typed Context Helpers**: Direct access to interaction payloads with `AsSlashContext()`, `AsButtonContext()`, `AsSelectMenuContext()`, `AsModalContext()`, and `AsMessageContext()`.
+- **Parameterized Component Routing**: Route buttons, menus, and modals with route parameters (`ticket:{id}`, `user:{action}:{id}`) and retrieve parameters via `ctx.Param("id")`.
 - **Ergonomic Response API**: Clean helpers for replies, edits, followups, and ephemeral messages (`ctx.ReplyEmbed(...)`, `ctx.ReplyEphemeral(...)`, `ctx.Followup(...)`, `ctx.Edit(...)`, `ctx.Delete()`).
-- **Custom Argument Parsers**: Define domain types with custom argument parsing logic on `ArgDef.Parser`.
+- **Custom Argument Parsers**: Define domain types with custom parsing logic on `ArgDef.Parser`.
 - **Router Lifecycle Hooks**: Intercept execution before and after handlers via `r.Before(...)` and `r.After(...)` for tracing, metrics, and auditing.
 - **Dynamic & Mention Prefixes**: Dynamic guild/user prefixes via `WithDynamicPrefixFunc(...)` alongside static prefixes and bot mention prefixes.
 - **Pluggable Cooldowns**: Extensible rate limiting with the `CooldownStore` interface, featuring built-in GCRA algorithms and external store readiness (e.g., Redis).
@@ -29,7 +31,9 @@ go get github.com/wumpkit-go/router
 
 ## Quick Start
 
-### 1. Functional Handlers
+### 1. Defining Chat and Slash Commands
+
+Commands are pure Go structs implementing the `ChatCommand` interface:
 
 ```go
 package main
@@ -43,6 +47,23 @@ import (
 	"github.com/wumpkit-go/wumpkit"
 )
 
+type PingCommand struct {
+	router.ChatCommandConfig
+}
+
+func NewPingCommand() *PingCommand {
+	return &PingCommand{
+		ChatCommandConfig: router.ChatCommandConfig{
+			Name:        "ping",
+			Description: "Check bot responsiveness",
+		},
+	}
+}
+
+func (c *PingCommand) Run(ctx router.Context) error {
+	return ctx.ReplyEphemeral("Pong! 🏓")
+}
+
 func main() {
 	client := wumpkit.New(
 		context.Background(),
@@ -51,16 +72,8 @@ func main() {
 
 	r := router.NewWithClient(client, router.WithPrefix("!"))
 
-	// chat command (works with both !ping and /ping)
-	r.Command("ping", func(ctx router.Context) error {
-		return ctx.ReplyEphemeral("Pong! 🏓")
-	}, router.WithDescription("Check bot responsiveness"))
-
-	// parameterized button handler
-	r.OnButton("ticket/:id", func(ctx *router.ButtonInteractionContext) error {
-		ticketID := ctx.Params().Get("id")
-		return ctx.ReplyEphemeral(fmt.Sprintf("Opened ticket #%s", ticketID))
-	})
+	// register chat command
+	r.MustRegisterCommand(NewPingCommand())
 
 	// wire to gateway events
 	r.Attach(client)
@@ -74,9 +87,37 @@ func main() {
 }
 ```
 
-### 2. Defining Commands as Structs
+### 2. Parameterized Component Commands
 
-Commands can also be defined cleanly as Go structs:
+Buttons, select menus, and modals receive their strongly typed context directly:
+
+```go
+type TicketButtonCommand struct {
+	router.ButtonCommandConfig
+}
+
+func NewTicketButtonCommand() *TicketButtonCommand {
+	return &TicketButtonCommand{
+		ButtonCommandConfig: router.ButtonCommandConfig{
+			CustomID: "ticket:{id}",
+		},
+	}
+}
+
+func (c *TicketButtonCommand) Run(ctx *router.ButtonCommandContext) error {
+	ticketID := ctx.Param("id")
+	return ctx.ReplyEphemeral(fmt.Sprintf("Opened ticket #%s", ticketID))
+}
+```
+
+Register component commands procedurally:
+
+```go
+// register button command
+r.MustRegisterButtonCommand(NewTicketButtonCommand())
+```
+
+### 3. Moderation Commands with Arguments and Permissions
 
 ```go
 type KickCommand struct {
@@ -87,7 +128,7 @@ func NewKickCommand() *KickCommand {
 	return &KickCommand{
 		ChatCommandConfig: router.ChatCommandConfig{
 			Name:            "kick",
-			Description:     "Kick a member from the server.",
+			Description:     "Kick a member from the server",
 			UserPermissions: wumpkit.PermissionKickMembers,
 			AppPermissions:  wumpkit.PermissionKickMembers,
 			Args: []router.ArgDef{
@@ -118,12 +159,6 @@ func (c *KickCommand) Run(ctx router.Context) error {
 
 	return ctx.Reply(fmt.Sprintf("Kicked <@%s> (%s)", targetID, reason), router.ReplyOptions{})
 }
-```
-
-Register the struct:
-
-```go
-r.MustRegisterCommand(NewKickCommand())
 ```
 
 ## Community and Support

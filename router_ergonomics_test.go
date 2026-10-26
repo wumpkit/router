@@ -12,35 +12,58 @@ import (
 	"github.com/wumpkit-go/wumpkit"
 )
 
-func TestRouter_FunctionalHandlers(t *testing.T) {
-	r := New()
-
-	var commandCalled bool
-	r.On("ping", func(ctx Context) error {
-		commandCalled = true
-		return nil
-	}, WithDescription("Ping command"))
-
-	cmd, exists := r.GetCommand("ping")
-	require.True(t, exists)
-	assert.Equal(t, "ping", cmd.Config().Name)
-	assert.Equal(t, "Ping command", cmd.Config().Description)
-
-	err := cmd.Run(&MessageCommandContext{})
-	require.NoError(t, err)
-	assert.True(t, commandCalled)
+type pingCommand struct {
+	ChatCommandConfig
+	called bool
 }
 
-func TestRouter_FunctionalComponentHandlers(t *testing.T) {
+func (p *pingCommand) Run(ctx Context) error {
+	p.called = true
+	return nil
+}
+
+func TestRouter_TypeDefinedCommands(t *testing.T) {
 	r := New()
 
-	var buttonCalled bool
-	var capturedID string
-	r.OnButton("ticket:{id}", func(ctx *ButtonCommandContext) error {
-		buttonCalled = true
-		capturedID = ctx.Param("id")
-		return nil
-	})
+	cmd := &pingCommand{
+		ChatCommandConfig: ChatCommandConfig{
+			Name:        "ping",
+			Description: "Ping command",
+		},
+	}
+	r.MustRegisterCommand(cmd)
+
+	retrieved, exists := r.GetCommand("ping")
+	require.True(t, exists)
+	assert.Equal(t, "ping", retrieved.Config().Name)
+	assert.Equal(t, "Ping command", retrieved.Config().Description)
+
+	err := retrieved.Run(&MessageCommandContext{})
+	require.NoError(t, err)
+	assert.True(t, cmd.called)
+}
+
+type ticketButtonCommand struct {
+	ButtonCommandConfig
+	called     bool
+	capturedID string
+}
+
+func (b *ticketButtonCommand) Run(ctx *ButtonCommandContext) error {
+	b.called = true
+	b.capturedID = ctx.Param("id")
+	return nil
+}
+
+func TestRouter_TypeDefinedComponentCommands(t *testing.T) {
+	r := New()
+
+	btn := &ticketButtonCommand{
+		ButtonCommandConfig: ButtonCommandConfig{
+			CustomID: "ticket:{id}",
+		},
+	}
+	r.MustRegisterButtonCommand(btn)
 
 	m, exists := r.MatchButtonCommand("ticket:12345")
 	require.True(t, exists)
@@ -54,8 +77,8 @@ func TestRouter_FunctionalComponentHandlers(t *testing.T) {
 	}
 	err := m.Value.Run(bCtx)
 	require.NoError(t, err)
-	assert.True(t, buttonCalled)
-	assert.Equal(t, "12345", capturedID)
+	assert.True(t, btn.called)
+	assert.Equal(t, "12345", btn.capturedID)
 }
 
 func TestRouter_CustomArgParser(t *testing.T) {
@@ -112,9 +135,14 @@ func TestRouter_BeforeAndAfterHooks(t *testing.T) {
 		sequence = append(sequence, "after")
 	})
 
-	r.On("test", func(ctx Context) error {
-		sequence = append(sequence, "run")
-		return nil
+	r.MustRegisterCommand(&mockCommand{
+		ChatCommandConfig: ChatCommandConfig{
+			Name: "test",
+		},
+		runFunc: func(ctx Context) error {
+			sequence = append(sequence, "run")
+			return nil
+		},
 	})
 
 	r.HandleMessage(context.Background(), wumpkit.MessageCreateEvent{
@@ -135,9 +163,14 @@ func TestRouter_DynamicPrefix(t *testing.T) {
 	}))
 
 	var called bool
-	r.On("test", func(ctx Context) error {
-		called = true
-		return nil
+	r.MustRegisterCommand(&mockCommand{
+		ChatCommandConfig: ChatCommandConfig{
+			Name: "test",
+		},
+		runFunc: func(ctx Context) error {
+			called = true
+			return nil
+		},
 	})
 
 	// should not trigger on ! for guild 999
@@ -157,33 +190,6 @@ func TestRouter_DynamicPrefix(t *testing.T) {
 		},
 	})
 	assert.True(t, called)
-}
-
-func TestRouter_TypedContextExtraction(t *testing.T) {
-	bCtx := &ButtonCommandContext{}
-	extracted, ok := AsButtonContext(bCtx)
-	assert.True(t, ok)
-	assert.NotNil(t, extracted)
-
-	sCtx := &SelectMenuCommandContext{}
-	extractedS, ok := AsSelectMenuContext(sCtx)
-	assert.True(t, ok)
-	assert.NotNil(t, extractedS)
-
-	mCtx := &ModalCommandContext{}
-	extractedM, ok := AsModalContext(mCtx)
-	assert.True(t, ok)
-	assert.NotNil(t, extractedM)
-
-	slashCtx := &SlashCommandContext{}
-	extractedSlash, ok := AsSlashContext(slashCtx)
-	assert.True(t, ok)
-	assert.NotNil(t, extractedSlash)
-
-	msgCtx := &MessageCommandContext{}
-	extractedMsg, ok := AsMessageContext(msgCtx)
-	assert.True(t, ok)
-	assert.NotNil(t, extractedMsg)
 }
 
 type mockCooldownStore struct {

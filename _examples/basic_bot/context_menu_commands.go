@@ -22,11 +22,8 @@ func newUserAvatarCommand() *UserAvatarCommand {
 	}
 }
 
-func (c *UserAvatarCommand) Run(ctx router.Context) error {
-	var target *wumpkit.User
-	if uCtx, ok := ctx.(*router.UserContextMenuCommandContext); ok {
-		target = uCtx.TargetUser()
-	}
+func (c *UserAvatarCommand) Run(ctx *router.UserContextMenuCommandContext) error {
+	target := ctx.TargetUser()
 	if target == nil {
 		author := ctx.Author()
 		target = &author
@@ -62,11 +59,8 @@ func newQuoteMessageCommand() *QuoteMessageCommand {
 	}
 }
 
-func (c *QuoteMessageCommand) Run(ctx router.Context) error {
-	var msg *wumpkit.Message
-	if mCtx, ok := ctx.(*router.MessageContextMenuCommandContext); ok {
-		msg = mCtx.TargetMessage()
-	}
+func (c *QuoteMessageCommand) Run(ctx *router.MessageContextMenuCommandContext) error {
+	msg := ctx.TargetMessage()
 	if msg == nil {
 		return fmt.Errorf("no target message found")
 	}

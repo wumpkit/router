@@ -184,7 +184,7 @@ func TestErrorHandler_UserContextMenuCommand(t *testing.T) {
 		UserContextMenuCommandConfig: UserContextMenuCommandConfig{
 			Name: "Inspect",
 		},
-		runFunc: func(ctx Context) error {
+		runFunc: func(ctx *UserContextMenuCommandContext) error {
 			return errors.New("user command failed")
 		},
 	}
@@ -211,7 +211,7 @@ func TestErrorHandler_MessageContextMenuCommand(t *testing.T) {
 		MessageContextMenuCommandConfig: MessageContextMenuCommandConfig{
 			Name: "Quote",
 		},
-		runFunc: func(ctx Context) error {
+		runFunc: func(ctx *MessageContextMenuCommandContext) error {
 			return errors.New("message command failed")
 		},
 	}

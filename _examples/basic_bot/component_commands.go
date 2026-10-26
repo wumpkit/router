@@ -112,7 +112,7 @@ func newPingRefreshButton(client *wumpkit.Client) *PingRefreshButton {
 	}
 }
 
-func (b *PingRefreshButton) Run(ctx router.Context) error {
+func (b *PingRefreshButton) Run(ctx *router.ButtonCommandContext) error {
 	latency := b.client.ShardManager().AverageLatency()
 
 	embed := wumpkit.NewEmbedBuilder().
@@ -132,17 +132,10 @@ func (b *PingRefreshButton) Run(ctx router.Context) error {
 		SetComponent(refreshBtn).
 		Build()
 
-	if bCtx, ok := ctx.(*router.ButtonCommandContext); ok {
-		return bCtx.UpdateComponentMessage(router.ReplyOptions{
-			Embeds:     []wumpkit.Embed{embed},
-			Components: []wumpkit.Component{row},
-		})
-	}
-	_, err := ctx.Reply("", router.ReplyOptions{
+	return ctx.UpdateComponentMessage(router.ReplyOptions{
 		Embeds:     []wumpkit.Embed{embed},
 		Components: []wumpkit.Component{row},
 	})
-	return err
 }
 
 // MenuAcceptButton handles the terms accept button click.
@@ -158,7 +151,7 @@ func newMenuAcceptButton() *MenuAcceptButton {
 	}
 }
 
-func (b *MenuAcceptButton) Run(ctx router.Context) error {
+func (b *MenuAcceptButton) Run(ctx *router.ButtonCommandContext) error {
 	author := ctx.Author()
 	_, err := ctx.Reply(fmt.Sprintf("✅ Thank you %s, you accepted the terms!", author.DisplayName()), router.ReplyOptions{
 		Flags: wumpkit.MessageFlagEphemeral,
@@ -179,7 +172,7 @@ func newMenuDeclineButton() *MenuDeclineButton {
 	}
 }
 
-func (b *MenuDeclineButton) Run(ctx router.Context) error {
+func (b *MenuDeclineButton) Run(ctx *router.ButtonCommandContext) error {
 	author := ctx.Author()
 	_, err := ctx.Reply(fmt.Sprintf("❌ %s, you declined the terms.", author.DisplayName()), router.ReplyOptions{
 		Flags: wumpkit.MessageFlagEphemeral,
@@ -200,12 +193,8 @@ func newCounterButton() *CounterButton {
 	}
 }
 
-func (b *CounterButton) Run(ctx router.Context) error {
-	bCtx, _ := ctx.(*router.ButtonCommandContext)
-	rawCount := ""
-	if bCtx != nil {
-		rawCount = bCtx.Param("count")
-	}
+func (b *CounterButton) Run(ctx *router.ButtonCommandContext) error {
+	rawCount := ctx.Param("count")
 	current, _ := strconv.Atoi(rawCount)
 	next := current + 1
 
@@ -237,12 +226,9 @@ func (b *CounterButton) Run(ctx router.Context) error {
 		SetComponent(btnAccept, btnDecline, btnCounter, btnLink).
 		Build()
 
-	if bCtx != nil {
-		return bCtx.UpdateComponentMessage(router.ReplyOptions{
-			Components: []wumpkit.Component{buttonRow},
-		})
-	}
-	return nil
+	return ctx.UpdateComponentMessage(router.ReplyOptions{
+		Components: []wumpkit.Component{buttonRow},
+	})
 }
 
 // MenuSelectColor handles the color select menu dropdown submission.
@@ -258,12 +244,9 @@ func newMenuSelectColor() *MenuSelectColor {
 	}
 }
 
-func (s *MenuSelectColor) Run(ctx router.Context) error {
+func (s *MenuSelectColor) Run(ctx *router.SelectMenuCommandContext) error {
 	author := ctx.Author()
-	var selected string
-	if sCtx, ok := ctx.(*router.SelectMenuCommandContext); ok {
-		selected = strings.Join(sCtx.Values(), ", ")
-	}
+	selected := strings.Join(ctx.Values(), ", ")
 	_, err := ctx.Reply(fmt.Sprintf("🎨 %s, you selected theme color: **%s**", author.DisplayName(), selected), router.ReplyOptions{
 		Flags: wumpkit.MessageFlagEphemeral,
 	})

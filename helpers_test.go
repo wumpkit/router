@@ -31,10 +31,10 @@ func (a *mockAutoCommand) Autocomplete(ctx context.Context, interaction *wumpkit
 
 type mockUserCommand struct {
 	UserContextMenuCommandConfig
-	runFunc func(ctx Context) error
+	runFunc func(ctx *UserContextMenuCommandContext) error
 }
 
-func (m *mockUserCommand) Run(ctx Context) error {
+func (m *mockUserCommand) Run(ctx *UserContextMenuCommandContext) error {
 	if m.runFunc != nil {
 		return m.runFunc(ctx)
 	}
@@ -43,10 +43,10 @@ func (m *mockUserCommand) Run(ctx Context) error {
 
 type mockMessageCommand struct {
 	MessageContextMenuCommandConfig
-	runFunc func(ctx Context) error
+	runFunc func(ctx *MessageContextMenuCommandContext) error
 }
 
-func (m *mockMessageCommand) Run(ctx Context) error {
+func (m *mockMessageCommand) Run(ctx *MessageContextMenuCommandContext) error {
 	if m.runFunc != nil {
 		return m.runFunc(ctx)
 	}
@@ -55,10 +55,10 @@ func (m *mockMessageCommand) Run(ctx Context) error {
 
 type mockButtonCommand struct {
 	ButtonCommandConfig
-	runFunc func(ctx Context) error
+	runFunc func(ctx *ButtonCommandContext) error
 }
 
-func (b *mockButtonCommand) Run(ctx Context) error {
+func (b *mockButtonCommand) Run(ctx *ButtonCommandContext) error {
 	if b.runFunc != nil {
 		return b.runFunc(ctx)
 	}
@@ -67,10 +67,10 @@ func (b *mockButtonCommand) Run(ctx Context) error {
 
 type mockSelectMenuCommand struct {
 	SelectMenuCommandConfig
-	runFunc func(ctx Context) error
+	runFunc func(ctx *SelectMenuCommandContext) error
 }
 
-func (s *mockSelectMenuCommand) Run(ctx Context) error {
+func (s *mockSelectMenuCommand) Run(ctx *SelectMenuCommandContext) error {
 	if s.runFunc != nil {
 		return s.runFunc(ctx)
 	}
@@ -79,10 +79,10 @@ func (s *mockSelectMenuCommand) Run(ctx Context) error {
 
 type mockModalCommand struct {
 	ModalCommandConfig
-	runFunc func(ctx Context) error
+	runFunc func(ctx *ModalCommandContext) error
 }
 
-func (m *mockModalCommand) Run(ctx Context) error {
+func (m *mockModalCommand) Run(ctx *ModalCommandContext) error {
 	if m.runFunc != nil {
 		return m.runFunc(ctx)
 	}

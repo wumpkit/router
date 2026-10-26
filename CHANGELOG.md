@@ -10,12 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-10-26
 
 ### Added
-- **Idiomatic Functional Handlers**: First-class registration helpers without builder patterns (`r.On`, `r.Command`, `r.OnButton`, `r.OnSelectMenu`, `r.OnModal`, `r.OnUserContextMenu`, `r.OnMessageContextMenu`).
-- **Functional Configuration Options**: Added comprehensive functional options for command customization (`WithDescription`, `WithAliases`, `WithUserPermissions`, `WithAppPermissions`, `WithGuildID`, `WithNSFW`, `WithCooldown`, etc.).
+- **Type-Defined Commands**: First-class command definition using idiomatic Go types and structs implementing command interfaces (`ChatCommand`, `ButtonCommand`, `SelectMenuCommand`, `ModalCommand`, `UserContextMenuCommand`, `MessageContextMenuCommand`).
+- **Strongly Typed Contexts**: Each component and context-menu command accepts its concrete context directly (`*ButtonCommandContext`, `*SelectMenuCommandContext`, `*ModalCommandContext`, `*UserContextMenuCommandContext`, `*MessageContextMenuCommandContext`) eliminating manual type assertions.
 - **Zero-Allocation Routing Fast Paths**:
   - `tokenizePath` in component pattern matcher now uses string slicing without heap allocations for ASCII paths.
   - `ParseTokens` in message tokenizer includes an early zero-allocation pass for positional-only commands.
-- **Typed Context Extraction**: Added helpers `AsSlashContext`, `AsMessageContext`, `AsButtonContext`, `AsSelectMenuContext`, and `AsModalContext`.
 - **Convenient Response Helpers**: Added `ReplyEmbed`, `ReplyEphemeral`, `Followup`, `Edit`, and `Delete` on `Context` and `MessageCommandContext`.
 - **Custom Argument Parsers**: Support custom parsers via `ArgDef.Parser func(string) (any, error)`.
 - **Router Lifecycle Hooks**: Added `Before` and `After` execution pipeline hooks for telemetry, metric tracking, and audit logging.

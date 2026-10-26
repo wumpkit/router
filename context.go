@@ -9,11 +9,11 @@ import (
 	"github.com/wumpkit-go/wumpkit"
 )
 
-// Context represents the central, unified execution context interface for all command types.
+// context represents unified execution context for all commands
 type Context interface {
 	context.Context
 
-	// Core environment & metadata
+	// core environment and metadata
 	Client() *wumpkit.Client
 	Author() wumpkit.User
 	AuthorMember() *wumpkit.Member
@@ -24,13 +24,13 @@ type Context interface {
 	UserPermissions() wumpkit.Permissions
 	ShardID() wumpkit.ShardID
 
-	// Event & Command
+	// event and command
 	Event() any
 	Command() any
 	Message() *wumpkit.Message
 	Interaction() wumpkit.Interaction
 
-	// Middleware Store
+	// middleware store
 	Set(key string, val any)
 	Get(key string) (any, bool)
 
@@ -43,35 +43,30 @@ type Context interface {
 	Delete() error
 	Defer(ephemeral bool) error
 
-	// Arguments & Flags (for Chat / Slash Commands)
+	// arguments and flags
 	Args() Args
 	Flags() Flags
-
-	// Permission & Member Enrichment
-	SetUserPermissions(perms wumpkit.Permissions)
-	SetAppPermissions(perms wumpkit.Permissions)
-	SetAuthorMember(member *wumpkit.Member)
 }
 
-// ReplyOptions configures response parameters for commands and interactions.
+// replyoptions configures response parameters for commands and interactions
 type ReplyOptions struct {
-	// Content is the text content of the message.
+	// content is the text content of the message
 	Content string
-	// Flags specifies message bitfield flags (e.g. wumpkit.MessageFlagEphemeral, wumpkit.MessageFlagSuppressEmbeds).
+	// flags specifies message bitfield flags
 	Flags wumpkit.MessageFlags
-	// TTS specifies whether this is a text-to-speech message.
+	// tts specifies whether this is a text-to-speech message
 	TTS bool
-	// Embeds contains Discord embed objects to include with the response.
+	// embeds contains discord embed objects
 	Embeds []wumpkit.Embed
-	// Components contains message interactive components (buttons, select menus).
+	// components contains message interactive components
 	Components []wumpkit.Component
-	// Files contains file attachments.
+	// files contains file attachments
 	Files []wumpkit.File
-	// AllowedMentions controls mention suppression.
+	// allowedmentions controls mention suppression
 	AllowedMentions *wumpkit.AllowedMentions
 }
 
-// ContextConfig bundles configuration parameters for building a generic Context.
+// contextconfig bundles configuration parameters for building a generic context
 type ContextConfig struct {
 	Command          any
 	Client           *wumpkit.Client
@@ -82,7 +77,7 @@ type ContextConfig struct {
 	ShardID          wumpkit.ShardID
 }
 
-// NewContext creates a new Context instance for generic use or testing.
+// newcontext creates a new context instance for generic use or testing
 func NewContext(ctx context.Context, cfg ContextConfig) Context {
 	if ctx == nil {
 		ctx = context.Background()
@@ -964,32 +959,3 @@ var (
 	_ Context = (*ModalCommandContext)(nil)
 )
 
-// asButtonContext extracts typed button context
-func AsButtonContext(ctx Context) (*ButtonCommandContext, bool) {
-	c, ok := ctx.(*ButtonCommandContext)
-	return c, ok
-}
-
-// asSelectMenuContext extracts typed select menu context
-func AsSelectMenuContext(ctx Context) (*SelectMenuCommandContext, bool) {
-	c, ok := ctx.(*SelectMenuCommandContext)
-	return c, ok
-}
-
-// asModalContext extracts typed modal context
-func AsModalContext(ctx Context) (*ModalCommandContext, bool) {
-	c, ok := ctx.(*ModalCommandContext)
-	return c, ok
-}
-
-// asSlashContext extracts typed slash command context
-func AsSlashContext(ctx Context) (*SlashCommandContext, bool) {
-	c, ok := ctx.(*SlashCommandContext)
-	return c, ok
-}
-
-// asMessageContext extracts typed message command context
-func AsMessageContext(ctx Context) (*MessageCommandContext, bool) {
-	c, ok := ctx.(*MessageCommandContext)
-	return c, ok
-}
