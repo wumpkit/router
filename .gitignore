@@ -1,0 +1,17 @@
+# Binaries
+*.test
+*.out
+dist/
+bin/
+
+# Environment
+.env
+.env.*
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
