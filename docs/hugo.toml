@@ -15,6 +15,7 @@ title = "Wumpkit Router Documentation"
     guessSyntax = true
     lineNos = false
     noClasses = false
+    tabWidth = 4
 
 [params]
   description = "A high-performance command and interaction router for Wumpkit"
