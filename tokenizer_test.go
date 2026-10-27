@@ -80,8 +80,15 @@ func TestParseTokens(t *testing.T) {
 		expectedFlags      map[string]string
 	}{
 		{
-			name:               "mixed positional and flags",
-			tokens:             []string{"@user", "--reason=spamming", "-s", "-d", "7", "extra_arg"},
+			name: "mixed positional and flags",
+			tokens: []string{
+				"@user",
+				"--reason=spamming",
+				"-s",
+				"-d",
+				"7",
+				"extra_arg",
+			},
 			expectedPositional: []string{"@user", "extra_arg"},
 			expectedFlags:      map[string]string{"reason": "spamming", "s": "true", "d": "7"},
 		},

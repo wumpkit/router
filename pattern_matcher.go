@@ -146,7 +146,12 @@ func (m *PatternMatcher[T]) Match(customID string) (MatchResult[T], bool) {
 	return matchTrieNode(m.root, incomingTokens, 0, nil)
 }
 
-func matchTrieNode[T any](node *trieNode[T], tokens []string, idx int, paramValues []string) (MatchResult[T], bool) {
+func matchTrieNode[T any](
+	node *trieNode[T],
+	tokens []string,
+	idx int,
+	paramValues []string,
+) (MatchResult[T], bool) {
 	if node == nil {
 		return MatchResult[T]{}, false
 	}

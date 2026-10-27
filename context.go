@@ -110,7 +110,12 @@ func NewContext(ctx context.Context, cfg ContextConfig) Context {
 		return newInteractionContext(ctx, cfg.Command, cfg.Client, *cfg.InteractionEvent)
 	}
 	if cfg.Interaction != nil {
-		return newInteractionContext(ctx, cfg.Command, cfg.Client, wumpkit.InteractionCreateEvent{ShardID: cfg.ShardID, Interaction: cfg.Interaction})
+		return newInteractionContext(
+			ctx,
+			cfg.Command,
+			cfg.Client,
+			wumpkit.InteractionCreateEvent{ShardID: cfg.ShardID, Interaction: cfg.Interaction},
+		)
 	}
 	return &interactionBaseContext{
 		Context: ctx,
@@ -174,7 +179,10 @@ func (c *MessageCommandContext) InGuild() bool {
 	return c.GuildID() != nil
 }
 
-func (c *MessageCommandContext) Reply(content string, opts ...ReplyOptions) (*wumpkit.Message, error) {
+func (c *MessageCommandContext) Reply(
+	content string,
+	opts ...ReplyOptions,
+) (*wumpkit.Message, error) {
 	if c.client == nil {
 		return nil, nil
 	}
@@ -188,14 +196,18 @@ func (c *MessageCommandContext) Reply(content string, opts ...ReplyOptions) (*wu
 		msgContent = opt.Content
 	}
 
-	msg, err := c.client.CreateMessage(c.Context, c.event.Message.ChannelID, wumpkit.CreateMessageOptions{
-		Content:         msgContent,
-		TTS:             opt.TTS,
-		Flags:           opt.Flags,
-		Embeds:          opt.Embeds,
-		AllowedMentions: opt.AllowedMentions,
-		Files:           opt.Files,
-	})
+	msg, err := c.client.CreateMessage(
+		c.Context,
+		c.event.Message.ChannelID,
+		wumpkit.CreateMessageOptions{
+			Content:         msgContent,
+			TTS:             opt.TTS,
+			Flags:           opt.Flags,
+			Embeds:          opt.Embeds,
+			AllowedMentions: opt.AllowedMentions,
+			Files:           opt.Files,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +225,10 @@ func (c *MessageCommandContext) Defer(ephemeral bool) error {
 }
 
 // replyembed sends an embed response
-func (c *MessageCommandContext) ReplyEmbed(embed wumpkit.Embed, ephemeral ...bool) (*wumpkit.Message, error) {
+func (c *MessageCommandContext) ReplyEmbed(
+	embed wumpkit.Embed,
+	ephemeral ...bool,
+) (*wumpkit.Message, error) {
 	return c.Reply("", ReplyOptions{Embeds: []wumpkit.Embed{embed}})
 }
 
@@ -223,7 +238,10 @@ func (c *MessageCommandContext) ReplyEphemeral(content string) (*wumpkit.Message
 }
 
 // followup sends a followup message
-func (c *MessageCommandContext) Followup(content string, opts ...ReplyOptions) (*wumpkit.Message, error) {
+func (c *MessageCommandContext) Followup(
+	content string,
+	opts ...ReplyOptions,
+) (*wumpkit.Message, error) {
 	return c.Reply(content, opts...)
 }
 
@@ -242,7 +260,10 @@ func toLayoutComponents(comps []wumpkit.Component) *[]wumpkit.LayoutComponent {
 }
 
 // edit modifies the initial reply
-func (c *MessageCommandContext) Edit(content string, opts ...ReplyOptions) (*wumpkit.Message, error) {
+func (c *MessageCommandContext) Edit(
+	content string,
+	opts ...ReplyOptions,
+) (*wumpkit.Message, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.initialReply == nil || c.client == nil {
@@ -260,13 +281,18 @@ func (c *MessageCommandContext) Edit(content string, opts ...ReplyOptions) (*wum
 	if msgContent != "" {
 		cnt = &msgContent
 	}
-	msg, err := c.client.EditMessage(c.Context, c.initialReply.ChannelID, c.initialReply.ID, wumpkit.EditMessageOptions{
-		Content:         cnt,
-		Embeds:          &opt.Embeds,
-		AllowedMentions: opt.AllowedMentions,
-		Components:      toLayoutComponents(opt.Components),
-		Files:           opt.Files,
-	})
+	msg, err := c.client.EditMessage(
+		c.Context,
+		c.initialReply.ChannelID,
+		c.initialReply.ID,
+		wumpkit.EditMessageOptions{
+			Content:         cnt,
+			Embeds:          &opt.Embeds,
+			AllowedMentions: opt.AllowedMentions,
+			Components:      toLayoutComponents(opt.Components),
+			Files:           opt.Files,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -432,7 +458,10 @@ func (c *interactionBaseContext) InGuild() bool {
 	return false
 }
 
-func (c *interactionBaseContext) Reply(content string, opts ...ReplyOptions) (*wumpkit.Message, error) {
+func (c *interactionBaseContext) Reply(
+	content string,
+	opts ...ReplyOptions,
+) (*wumpkit.Message, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -451,15 +480,20 @@ func (c *interactionBaseContext) Reply(content string, opts ...ReplyOptions) (*w
 	}
 
 	if !c.deferred && !c.replied {
-		err := c.client.RespondMessage(c.Context, c.event.Interaction, msgContent, wumpkit.RespondMessageOptions{
-			Content:         msgContent,
-			Flags:           opt.Flags,
-			TTS:             opt.TTS,
-			Embeds:          opt.Embeds,
-			Components:      opt.Components,
-			AllowedMentions: opt.AllowedMentions,
-			Files:           opt.Files,
-		})
+		err := c.client.RespondMessage(
+			c.Context,
+			c.event.Interaction,
+			msgContent,
+			wumpkit.RespondMessageOptions{
+				Content:         msgContent,
+				Flags:           opt.Flags,
+				TTS:             opt.TTS,
+				Embeds:          opt.Embeds,
+				Components:      opt.Components,
+				AllowedMentions: opt.AllowedMentions,
+				Files:           opt.Files,
+			},
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -472,15 +506,20 @@ func (c *interactionBaseContext) Reply(content string, opts ...ReplyOptions) (*w
 		return c.editReplyInternal(msgContent, opt)
 	}
 
-	msg, err := c.client.CreateFollowupMessage(c.Context, c.event.Interaction.GetApplicationID(), c.event.Interaction.GetToken(), wumpkit.CreateFollowupMessageOptions{
-		Content:         msgContent,
-		TTS:             opt.TTS,
-		Flags:           opt.Flags,
-		Embeds:          opt.Embeds,
-		Components:      opt.Components,
-		Files:           opt.Files,
-		AllowedMentions: opt.AllowedMentions,
-	})
+	msg, err := c.client.CreateFollowupMessage(
+		c.Context,
+		c.event.Interaction.GetApplicationID(),
+		c.event.Interaction.GetToken(),
+		wumpkit.CreateFollowupMessageOptions{
+			Content:         msgContent,
+			TTS:             opt.TTS,
+			Flags:           opt.Flags,
+			Embeds:          opt.Embeds,
+			Components:      opt.Components,
+			Files:           opt.Files,
+			AllowedMentions: opt.AllowedMentions,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -505,7 +544,10 @@ func (c *interactionBaseContext) Defer(ephemeral bool) error {
 	return err
 }
 
-func (c *interactionBaseContext) editReplyInternal(msgContent string, opt ReplyOptions) (*wumpkit.Message, error) {
+func (c *interactionBaseContext) editReplyInternal(
+	msgContent string,
+	opt ReplyOptions,
+) (*wumpkit.Message, error) {
 	if c.event.Interaction != nil && c.client != nil {
 		var cnt *string
 		if msgContent != "" {
@@ -515,14 +557,19 @@ func (c *interactionBaseContext) editReplyInternal(msgContent string, opt ReplyO
 		if opt.Flags != 0 {
 			flags = &opt.Flags
 		}
-		msg, err := c.client.EditOriginalInteractionResponse(c.Context, c.event.Interaction.GetApplicationID(), c.event.Interaction.GetToken(), wumpkit.EditFollowupMessageOptions{
-			Content:         cnt,
-			Embeds:          &opt.Embeds,
-			Components:      &opt.Components,
-			Files:           opt.Files,
-			AllowedMentions: opt.AllowedMentions,
-			Flags:           flags,
-		})
+		msg, err := c.client.EditOriginalInteractionResponse(
+			c.Context,
+			c.event.Interaction.GetApplicationID(),
+			c.event.Interaction.GetToken(),
+			wumpkit.EditFollowupMessageOptions{
+				Content:         cnt,
+				Embeds:          &opt.Embeds,
+				Components:      &opt.Components,
+				Files:           opt.Files,
+				AllowedMentions: opt.AllowedMentions,
+				Flags:           flags,
+			},
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -533,7 +580,10 @@ func (c *interactionBaseContext) editReplyInternal(msgContent string, opt ReplyO
 }
 
 // replyembed sends an embed response
-func (c *interactionBaseContext) ReplyEmbed(embed wumpkit.Embed, ephemeral ...bool) (*wumpkit.Message, error) {
+func (c *interactionBaseContext) ReplyEmbed(
+	embed wumpkit.Embed,
+	ephemeral ...bool,
+) (*wumpkit.Message, error) {
 	var flags wumpkit.MessageFlags
 	if len(ephemeral) > 0 && ephemeral[0] {
 		flags = wumpkit.MessageFlagEphemeral
@@ -547,7 +597,10 @@ func (c *interactionBaseContext) ReplyEphemeral(content string) (*wumpkit.Messag
 }
 
 // followup sends an interaction followup message
-func (c *interactionBaseContext) Followup(content string, opts ...ReplyOptions) (*wumpkit.Message, error) {
+func (c *interactionBaseContext) Followup(
+	content string,
+	opts ...ReplyOptions,
+) (*wumpkit.Message, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -565,15 +618,20 @@ func (c *interactionBaseContext) Followup(content string, opts ...ReplyOptions) 
 		msgContent = opt.Content
 	}
 
-	msg, err := c.client.CreateFollowupMessage(c.Context, c.event.Interaction.GetApplicationID(), c.event.Interaction.GetToken(), wumpkit.CreateFollowupMessageOptions{
-		Content:         msgContent,
-		TTS:             opt.TTS,
-		Flags:           opt.Flags,
-		Embeds:          opt.Embeds,
-		Components:      opt.Components,
-		Files:           opt.Files,
-		AllowedMentions: opt.AllowedMentions,
-	})
+	msg, err := c.client.CreateFollowupMessage(
+		c.Context,
+		c.event.Interaction.GetApplicationID(),
+		c.event.Interaction.GetToken(),
+		wumpkit.CreateFollowupMessageOptions{
+			Content:         msgContent,
+			TTS:             opt.TTS,
+			Flags:           opt.Flags,
+			Embeds:          opt.Embeds,
+			Components:      opt.Components,
+			Files:           opt.Files,
+			AllowedMentions: opt.AllowedMentions,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -582,7 +640,10 @@ func (c *interactionBaseContext) Followup(content string, opts ...ReplyOptions) 
 }
 
 // edit modifies the initial interaction response
-func (c *interactionBaseContext) Edit(content string, opts ...ReplyOptions) (*wumpkit.Message, error) {
+func (c *interactionBaseContext) Edit(
+	content string,
+	opts ...ReplyOptions,
+) (*wumpkit.Message, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -601,7 +662,11 @@ func (c *interactionBaseContext) Delete() error {
 	if c.client == nil || c.event.Interaction == nil {
 		return nil
 	}
-	return c.client.DeleteOriginalInteractionResponse(c.Context, c.event.Interaction.GetApplicationID(), c.event.Interaction.GetToken())
+	return c.client.DeleteOriginalInteractionResponse(
+		c.Context,
+		c.event.Interaction.GetApplicationID(),
+		c.event.Interaction.GetToken(),
+	)
 }
 
 func (c *interactionBaseContext) updateComponentMessage(opts ...ReplyOptions) error {
@@ -842,7 +907,12 @@ func (s *contextStore) Get(key string) (any, bool) {
 	return v, ok
 }
 
-func newInteractionContext(ctx context.Context, cmd any, client *wumpkit.Client, event wumpkit.InteractionCreateEvent) Context {
+func newInteractionContext(
+	ctx context.Context,
+	cmd any,
+	client *wumpkit.Client,
+	event wumpkit.InteractionCreateEvent,
+) Context {
 	switch it := event.Interaction.(type) {
 	case *wumpkit.ChatInputCommandInteraction:
 		var chatCmd ChatCommand

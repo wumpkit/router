@@ -130,34 +130,66 @@ func TestRegistry_RegisterAliasErrors(t *testing.T) {
 func TestRegistry_ContextMenuCommandErrors(t *testing.T) {
 	r := New()
 
-	uCmd := &mockUserCommand{UserContextMenuCommandConfig: UserContextMenuCommandConfig{Name: "inspect"}}
+	uCmd := &mockUserCommand{
+		UserContextMenuCommandConfig: UserContextMenuCommandConfig{Name: "inspect"},
+	}
 	require.NoError(t, r.RegisterUserContextMenuCommand(uCmd))
-	assert.ErrorIs(t, r.RegisterUserContextMenuCommand(uCmd), ErrUserContextMenuCommandAlreadyExists)
+	assert.ErrorIs(
+		t,
+		r.RegisterUserContextMenuCommand(uCmd),
+		ErrUserContextMenuCommandAlreadyExists,
+	)
 
-	mCmd := &mockMessageCommand{MessageContextMenuCommandConfig: MessageContextMenuCommandConfig{Name: "quote"}}
+	mCmd := &mockMessageCommand{
+		MessageContextMenuCommandConfig: MessageContextMenuCommandConfig{Name: "quote"},
+	}
 	require.NoError(t, r.RegisterMessageContextMenuCommand(mCmd))
-	assert.ErrorIs(t, r.RegisterMessageContextMenuCommand(mCmd), ErrMessageContextMenuCommandAlreadyExists)
+	assert.ErrorIs(
+		t,
+		r.RegisterMessageContextMenuCommand(mCmd),
+		ErrMessageContextMenuCommandAlreadyExists,
+	)
 }
 
 func TestRegistry_ComponentAndModalCommandErrors(t *testing.T) {
 	r := New()
 
 	assert.ErrorIs(t, r.RegisterButtonCommand(nil), ErrNilCommand)
-	assert.ErrorIs(t, r.RegisterButtonCommand(&mockButtonCommand{ButtonCommandConfig: ButtonCommandConfig{CustomID: ""}}), ErrEmptyCustomID)
+	assert.ErrorIs(
+		t,
+		r.RegisterButtonCommand(
+			&mockButtonCommand{ButtonCommandConfig: ButtonCommandConfig{CustomID: ""}},
+		),
+		ErrEmptyCustomID,
+	)
 
 	btnCmd := &mockButtonCommand{ButtonCommandConfig: ButtonCommandConfig{CustomID: "btn:ok"}}
 	require.NoError(t, r.RegisterButtonCommand(btnCmd))
 	assert.ErrorIs(t, r.RegisterButtonCommand(btnCmd), ErrButtonCommandAlreadyExists)
 
 	assert.ErrorIs(t, r.RegisterSelectMenuCommand(nil), ErrNilCommand)
-	assert.ErrorIs(t, r.RegisterSelectMenuCommand(&mockSelectMenuCommand{SelectMenuCommandConfig: SelectMenuCommandConfig{CustomID: ""}}), ErrEmptyCustomID)
+	assert.ErrorIs(
+		t,
+		r.RegisterSelectMenuCommand(
+			&mockSelectMenuCommand{SelectMenuCommandConfig: SelectMenuCommandConfig{CustomID: ""}},
+		),
+		ErrEmptyCustomID,
+	)
 
-	selectCmd := &mockSelectMenuCommand{SelectMenuCommandConfig: SelectMenuCommandConfig{CustomID: "menu:choose"}}
+	selectCmd := &mockSelectMenuCommand{
+		SelectMenuCommandConfig: SelectMenuCommandConfig{CustomID: "menu:choose"},
+	}
 	require.NoError(t, r.RegisterSelectMenuCommand(selectCmd))
 	assert.ErrorIs(t, r.RegisterSelectMenuCommand(selectCmd), ErrSelectMenuCommandAlreadyExists)
 
 	assert.ErrorIs(t, r.RegisterModalCommand(nil), ErrNilCommand)
-	assert.ErrorIs(t, r.RegisterModalCommand(&mockModalCommand{ModalCommandConfig: ModalCommandConfig{CustomID: ""}}), ErrEmptyCustomID)
+	assert.ErrorIs(
+		t,
+		r.RegisterModalCommand(
+			&mockModalCommand{ModalCommandConfig: ModalCommandConfig{CustomID: ""}},
+		),
+		ErrEmptyCustomID,
+	)
 
 	modalCmd := &mockModalCommand{ModalCommandConfig: ModalCommandConfig{CustomID: "form:submit"}}
 	require.NoError(t, r.RegisterModalCommand(modalCmd))
@@ -172,29 +204,61 @@ func TestRegistry_MustPanics(t *testing.T) {
 		r.MustRegisterCommand(&mockCommand{ChatCommandConfig: ChatCommandConfig{Name: "help"}})
 	})
 
-	r.MustRegisterUserContextMenuCommand(&mockUserCommand{UserContextMenuCommandConfig: UserContextMenuCommandConfig{Name: "user_help"}})
+	r.MustRegisterUserContextMenuCommand(
+		&mockUserCommand{
+			UserContextMenuCommandConfig: UserContextMenuCommandConfig{Name: "user_help"},
+		},
+	)
 	assert.Panics(t, func() {
-		r.MustRegisterUserContextMenuCommand(&mockUserCommand{UserContextMenuCommandConfig: UserContextMenuCommandConfig{Name: "user_help"}})
+		r.MustRegisterUserContextMenuCommand(
+			&mockUserCommand{
+				UserContextMenuCommandConfig: UserContextMenuCommandConfig{Name: "user_help"},
+			},
+		)
 	})
 
-	r.MustRegisterMessageContextMenuCommand(&mockMessageCommand{MessageContextMenuCommandConfig: MessageContextMenuCommandConfig{Name: "msg_help"}})
+	r.MustRegisterMessageContextMenuCommand(
+		&mockMessageCommand{
+			MessageContextMenuCommandConfig: MessageContextMenuCommandConfig{Name: "msg_help"},
+		},
+	)
 	assert.Panics(t, func() {
-		r.MustRegisterMessageContextMenuCommand(&mockMessageCommand{MessageContextMenuCommandConfig: MessageContextMenuCommandConfig{Name: "msg_help"}})
+		r.MustRegisterMessageContextMenuCommand(
+			&mockMessageCommand{
+				MessageContextMenuCommandConfig: MessageContextMenuCommandConfig{Name: "msg_help"},
+			},
+		)
 	})
 
-	r.MustRegisterButtonCommand(&mockButtonCommand{ButtonCommandConfig: ButtonCommandConfig{CustomID: "btn_help"}})
+	r.MustRegisterButtonCommand(
+		&mockButtonCommand{ButtonCommandConfig: ButtonCommandConfig{CustomID: "btn_help"}},
+	)
 	assert.Panics(t, func() {
-		r.MustRegisterButtonCommand(&mockButtonCommand{ButtonCommandConfig: ButtonCommandConfig{CustomID: "btn_help"}})
+		r.MustRegisterButtonCommand(
+			&mockButtonCommand{ButtonCommandConfig: ButtonCommandConfig{CustomID: "btn_help"}},
+		)
 	})
 
-	r.MustRegisterSelectMenuCommand(&mockSelectMenuCommand{SelectMenuCommandConfig: SelectMenuCommandConfig{CustomID: "menu_help"}})
+	r.MustRegisterSelectMenuCommand(
+		&mockSelectMenuCommand{
+			SelectMenuCommandConfig: SelectMenuCommandConfig{CustomID: "menu_help"},
+		},
+	)
 	assert.Panics(t, func() {
-		r.MustRegisterSelectMenuCommand(&mockSelectMenuCommand{SelectMenuCommandConfig: SelectMenuCommandConfig{CustomID: "menu_help"}})
+		r.MustRegisterSelectMenuCommand(
+			&mockSelectMenuCommand{
+				SelectMenuCommandConfig: SelectMenuCommandConfig{CustomID: "menu_help"},
+			},
+		)
 	})
 
-	r.MustRegisterModalCommand(&mockModalCommand{ModalCommandConfig: ModalCommandConfig{CustomID: "modal_help"}})
+	r.MustRegisterModalCommand(
+		&mockModalCommand{ModalCommandConfig: ModalCommandConfig{CustomID: "modal_help"}},
+	)
 	assert.Panics(t, func() {
-		r.MustRegisterModalCommand(&mockModalCommand{ModalCommandConfig: ModalCommandConfig{CustomID: "modal_help"}})
+		r.MustRegisterModalCommand(
+			&mockModalCommand{ModalCommandConfig: ModalCommandConfig{CustomID: "modal_help"}},
+		)
 	})
 }
 

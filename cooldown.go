@@ -58,5 +58,9 @@ func (e *CooldownError) Error() string {
 
 // cooldownStore manages custom rate limit storage
 type CooldownStore interface {
-	Allow(key string, limit int, duration time.Duration) (allowed bool, remaining time.Duration, err error)
+	Allow(
+		key string,
+		limit int,
+		duration time.Duration,
+	) (allowed bool, remaining time.Duration, err error)
 }

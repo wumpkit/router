@@ -43,25 +43,46 @@ func (h *DefaultCommandErrorHandler) OnMissingArgument(ctx Context, name string,
 }
 
 // OnInvalidArgument responds with invalid argument format description.
-func (h *DefaultCommandErrorHandler) OnInvalidArgument(ctx Context, name string, expected string, received string) {
+func (h *DefaultCommandErrorHandler) OnInvalidArgument(
+	ctx Context,
+	name string,
+	expected string,
+	received string,
+) {
 	desc := fmt.Sprintf("`%s` is not a valid %s for `%s`", received, expected, name)
 	h.replyError(ctx, desc)
 }
 
 // OnUserPermissionMissing responds with missing user permissions description.
-func (h *DefaultCommandErrorHandler) OnUserPermissionMissing(ctx Context, missing wumpkit.Permissions) {
-	desc := fmt.Sprintf("You are missing the required permission(s): %s", formatPermissions(missing))
+func (h *DefaultCommandErrorHandler) OnUserPermissionMissing(
+	ctx Context,
+	missing wumpkit.Permissions,
+) {
+	desc := fmt.Sprintf(
+		"You are missing the required permission(s): %s",
+		formatPermissions(missing),
+	)
 	h.replyError(ctx, desc)
 }
 
 // OnAppPermissionMissing responds with missing bot permissions description.
-func (h *DefaultCommandErrorHandler) OnAppPermissionMissing(ctx Context, missing wumpkit.Permissions) {
-	desc := fmt.Sprintf("The bot is missing the required permission(s): %s", formatPermissions(missing))
+func (h *DefaultCommandErrorHandler) OnAppPermissionMissing(
+	ctx Context,
+	missing wumpkit.Permissions,
+) {
+	desc := fmt.Sprintf(
+		"The bot is missing the required permission(s): %s",
+		formatPermissions(missing),
+	)
 	h.replyError(ctx, desc)
 }
 
 // OnCooldown responds with cooldown rate limit violation description.
-func (h *DefaultCommandErrorHandler) OnCooldown(ctx Context, remaining time.Duration, scope CooldownScope) {
+func (h *DefaultCommandErrorHandler) OnCooldown(
+	ctx Context,
+	remaining time.Duration,
+	scope CooldownScope,
+) {
 	var target string
 	switch scope {
 	case CooldownScopeGuild:
@@ -75,7 +96,11 @@ func (h *DefaultCommandErrorHandler) OnCooldown(ctx Context, remaining time.Dura
 	default:
 		target = "You are"
 	}
-	desc := fmt.Sprintf("%s on cooldown! Please wait `%.1fs` before using this command again", target, remaining.Seconds())
+	desc := fmt.Sprintf(
+		"%s on cooldown! Please wait `%.1fs` before using this command again",
+		target,
+		remaining.Seconds(),
+	)
 	h.replyError(ctx, desc)
 }
 
@@ -97,7 +122,11 @@ func (h *DefaultCommandErrorHandler) OnCommandError(ctx Context, cmd any, err er
 	if cmd != nil {
 		cmdName = ExtractCommonConfig(cmd).Name
 	}
-	desc := fmt.Sprintf("An error occurred while running command `%s`: ```\n%s\n```", cmdName, err.Error())
+	desc := fmt.Sprintf(
+		"An error occurred while running command `%s`: ```\n%s\n```",
+		cmdName,
+		err.Error(),
+	)
 	h.replyError(ctx, desc)
 }
 

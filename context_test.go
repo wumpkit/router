@@ -329,8 +329,10 @@ func TestSpecializedContexts_Methods(t *testing.T) {
 			&wumpkit.ActionRowComponent{
 				Components: []wumpkit.InteractiveComponent{
 					&wumpkit.TextInputComponent{
-						InteractiveComponentFields: wumpkit.InteractiveComponentFields{CustomID: "feedback_text"},
-						Value:                      "great bot!",
+						InteractiveComponentFields: wumpkit.InteractiveComponentFields{
+							CustomID: "feedback_text",
+						},
+						Value: "great bot!",
 					},
 				},
 			},
@@ -339,7 +341,9 @@ func TestSpecializedContexts_Methods(t *testing.T) {
 	modalCtx := &ModalCommandContext{
 		interactionBaseContext: interactionBaseContext{
 			Context: context.Background(),
-			event:   wumpkit.InteractionCreateEvent{Interaction: &wumpkit.ModalSubmitInteraction{Data: *modalData}},
+			event: wumpkit.InteractionCreateEvent{
+				Interaction: &wumpkit.ModalSubmitInteraction{Data: *modalData},
+			},
 		},
 		patternContext: patternContext{
 			matchedPattern: "feedback/user/{id}",

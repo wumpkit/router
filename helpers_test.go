@@ -24,7 +24,10 @@ type mockAutoCommand struct {
 	autocompleteCalled bool
 }
 
-func (a *mockAutoCommand) Autocomplete(ctx context.Context, interaction *wumpkit.AutoCompleteInteraction) error {
+func (a *mockAutoCommand) Autocomplete(
+	ctx context.Context,
+	interaction *wumpkit.AutoCompleteInteraction,
+) error {
 	a.autocompleteCalled = true
 	return nil
 }
@@ -114,7 +117,12 @@ func (t *trackingErrorHandler) OnMissingArgument(ctx Context, name string, expec
 	t.missingArgName = name
 }
 
-func (t *trackingErrorHandler) OnInvalidArgument(ctx Context, name string, expected string, received string) {
+func (t *trackingErrorHandler) OnInvalidArgument(
+	ctx Context,
+	name string,
+	expected string,
+	received string,
+) {
 	t.invalidArgCalled = true
 	t.invalidArgReceived = received
 }
@@ -129,7 +137,11 @@ func (t *trackingErrorHandler) OnAppPermissionMissing(ctx Context, missing wumpk
 	t.appPermMissingValue = missing
 }
 
-func (t *trackingErrorHandler) OnCooldown(ctx Context, remaining time.Duration, scope CooldownScope) {
+func (t *trackingErrorHandler) OnCooldown(
+	ctx Context,
+	remaining time.Duration,
+	scope CooldownScope,
+) {
 	t.cooldownCalled = true
 	t.cooldownRemaining = remaining
 	t.cooldownScope = scope

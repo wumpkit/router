@@ -62,7 +62,10 @@ func TestPatternMatcher_NamedParameters(t *testing.T) {
 func TestPatternMatcher_MultipleParametersAndNamespacing(t *testing.T) {
 	matcher := NewPatternMatcher[string]()
 
-	require.NoError(t, matcher.Insert("tickets/{ticket_id}/action/{action_name}", "ticket_action_handler"))
+	require.NoError(
+		t,
+		matcher.Insert("tickets/{ticket_id}/action/{action_name}", "ticket_action_handler"),
+	)
 
 	res, ok := matcher.Match("tickets/7788/action/escalate")
 	assert.True(t, ok)
@@ -243,8 +246,10 @@ func TestRouter_ModalCommandWithHTTPPathParams(t *testing.T) {
 					&wumpkit.ActionRowComponent{
 						Components: []wumpkit.InteractiveComponent{
 							&wumpkit.TextInputComponent{
-								InteractiveComponentFields: wumpkit.InteractiveComponentFields{CustomID: "details"},
-								Value:                      "Invoice issue",
+								InteractiveComponentFields: wumpkit.InteractiveComponentFields{
+									CustomID: "details",
+								},
+								Value: "Invoice issue",
 							},
 						},
 					},

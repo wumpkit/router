@@ -171,7 +171,8 @@ func ParseTokens(tokens []string, flagDefs []FlagDef) *ParsedInput {
 			} else {
 				key := strings.ToLower(flagContent)
 				def, exists := findFlag(key, flagDefs)
-				if exists && def.Type != FlagTypeBool && i+1 < len(tokens) && !strings.HasPrefix(tokens[i+1], "-") {
+				if exists && def.Type != FlagTypeBool && i+1 < len(tokens) &&
+					!strings.HasPrefix(tokens[i+1], "-") {
 					i++
 					input.setFlag(key, tokens[i])
 				} else {

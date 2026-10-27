@@ -9,32 +9,60 @@ import (
 
 var (
 	// Sentinel errors for command registration and validation.
-	ErrNilCommand                             = errors.New("router: command cannot be nil")
-	ErrEmptyCommandName                       = errors.New("router: command name cannot be empty")
-	ErrEmptyCustomID                          = errors.New("router: custom ID cannot be empty")
-	ErrCommandAlreadyExists                   = errors.New("router: command name already registered")
-	ErrAliasAlreadyExists                     = errors.New("router: alias already registered to another command")
-	ErrTargetCommandNotFound                  = errors.New("router: target command not found")
-	ErrUserContextMenuCommandAlreadyExists    = errors.New("router: user context menu command already registered")
-	ErrMessageContextMenuCommandAlreadyExists = errors.New("router: message context menu command already registered")
-	ErrButtonCommandAlreadyExists             = errors.New("router: button command already registered")
-	ErrSelectMenuCommandAlreadyExists         = errors.New("router: select menu command already registered")
-	ErrModalCommandAlreadyExists              = errors.New("router: modal command already registered")
-	ErrNilCategory                            = errors.New("router: category cannot be nil")
-	ErrEmptyCategoryName                      = errors.New("router: category name cannot be empty")
-	ErrCategoryAlreadyExists                  = errors.New("router: category already registered")
-	ErrCategoryCycle                          = errors.New("router: category parent cycle detected")
-	ErrCommandNameTooLong                     = errors.New("router: command name cannot exceed 3 words")
-	ErrAliasTooLong                           = errors.New("router: alias cannot exceed 3 words")
-	ErrRequiredArgWithDefault                 = errors.New("router: required argument cannot have a default value")
-	ErrOptionalArgBeforeRequired              = errors.New("router: optional argument cannot precede a required argument")
-	ErrEndlessArgNotLast                      = errors.New("router: endless argument must be the last argument")
-	ErrEmptyArgName                           = errors.New("router: argument name cannot be empty")
-	ErrDuplicateArgName                       = errors.New("router: duplicate argument name")
-	ErrEmptyFlagName                          = errors.New("router: flag name cannot be empty")
-	ErrDuplicateFlagName                      = errors.New("router: duplicate flag name or short alias")
-	ErrInvalidLengthRange                     = errors.New("router: invalid length range (MinLength cannot exceed MaxLength or be negative)")
-	ErrInvalidValueRange                      = errors.New("router: invalid value range (MinValue cannot exceed MaxValue)")
+	ErrNilCommand           = errors.New("router: command cannot be nil")
+	ErrEmptyCommandName     = errors.New("router: command name cannot be empty")
+	ErrEmptyCustomID        = errors.New("router: custom ID cannot be empty")
+	ErrCommandAlreadyExists = errors.New(
+		"router: command name already registered",
+	)
+	ErrAliasAlreadyExists = errors.New(
+		"router: alias already registered to another command",
+	)
+	ErrTargetCommandNotFound               = errors.New("router: target command not found")
+	ErrUserContextMenuCommandAlreadyExists = errors.New(
+		"router: user context menu command already registered",
+	)
+	ErrMessageContextMenuCommandAlreadyExists = errors.New(
+		"router: message context menu command already registered",
+	)
+	ErrButtonCommandAlreadyExists = errors.New(
+		"router: button command already registered",
+	)
+	ErrSelectMenuCommandAlreadyExists = errors.New(
+		"router: select menu command already registered",
+	)
+	ErrModalCommandAlreadyExists = errors.New(
+		"router: modal command already registered",
+	)
+	ErrNilCategory           = errors.New("router: category cannot be nil")
+	ErrEmptyCategoryName     = errors.New("router: category name cannot be empty")
+	ErrCategoryAlreadyExists = errors.New("router: category already registered")
+	ErrCategoryCycle         = errors.New("router: category parent cycle detected")
+	ErrCommandNameTooLong    = errors.New(
+		"router: command name cannot exceed 3 words",
+	)
+	ErrAliasTooLong           = errors.New("router: alias cannot exceed 3 words")
+	ErrRequiredArgWithDefault = errors.New(
+		"router: required argument cannot have a default value",
+	)
+	ErrOptionalArgBeforeRequired = errors.New(
+		"router: optional argument cannot precede a required argument",
+	)
+	ErrEndlessArgNotLast = errors.New(
+		"router: endless argument must be the last argument",
+	)
+	ErrEmptyArgName      = errors.New("router: argument name cannot be empty")
+	ErrDuplicateArgName  = errors.New("router: duplicate argument name")
+	ErrEmptyFlagName     = errors.New("router: flag name cannot be empty")
+	ErrDuplicateFlagName = errors.New(
+		"router: duplicate flag name or short alias",
+	)
+	ErrInvalidLengthRange = errors.New(
+		"router: invalid length range (MinLength cannot exceed MaxLength or be negative)",
+	)
+	ErrInvalidValueRange = errors.New(
+		"router: invalid value range (MinValue cannot exceed MaxValue)",
+	)
 )
 
 // CommandRegistrationError represents a detailed error during command, argument, flag, or alias registration.
@@ -430,7 +458,9 @@ func (r *Registry) OnAutocomplete(commandName, optionName string, handler Autoco
 }
 
 // GetAutocompleteHandler retrieves an autocomplete handler for a specific command and option.
-func (r *Registry) GetAutocompleteHandler(commandName, optionName string) (AutocompleteHandler, bool) {
+func (r *Registry) GetAutocompleteHandler(
+	commandName, optionName string,
+) (AutocompleteHandler, bool) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	key := strings.ToLower(strings.TrimSpace(commandName) + ":" + strings.TrimSpace(optionName))
@@ -621,7 +651,15 @@ func validateArgDefinitions(cmdName string, args []ArgDef) error {
 			}
 		}
 
-		if err := validateValueConstraints(cmdName, argName, arg.MinLength, arg.MaxLength, arg.MinValue, arg.MaxValue, false); err != nil {
+		if err := validateValueConstraints(
+			cmdName,
+			argName,
+			arg.MinLength,
+			arg.MaxLength,
+			arg.MinValue,
+			arg.MaxValue,
+			false,
+		); err != nil {
 			return err
 		}
 	}
@@ -663,7 +701,15 @@ func validateFlagDefinitions(cmdName string, flags []FlagDef) error {
 			seenShortFlags[short] = true
 		}
 
-		if err := validateValueConstraints(cmdName, flagName, flag.MinLength, flag.MaxLength, flag.MinValue, flag.MaxValue, true); err != nil {
+		if err := validateValueConstraints(
+			cmdName,
+			flagName,
+			flag.MinLength,
+			flag.MaxLength,
+			flag.MinValue,
+			flag.MaxValue,
+			true,
+		); err != nil {
 			return err
 		}
 	}
@@ -671,7 +717,12 @@ func validateFlagDefinitions(cmdName string, flags []FlagDef) error {
 	return nil
 }
 
-func validateValueConstraints(cmdName, itemName string, minLen, maxLen *int, minVal, maxVal *float64, isFlag bool) error {
+func validateValueConstraints(
+	cmdName, itemName string,
+	minLen, maxLen *int,
+	minVal, maxVal *float64,
+	isFlag bool,
+) error {
 	if minLen != nil && *minLen < 0 {
 		return makeConstraintError(ErrInvalidLengthRange, cmdName, itemName, isFlag)
 	}

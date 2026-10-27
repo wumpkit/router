@@ -19,7 +19,11 @@ type cooldownTrackingHandler struct {
 	cooldownScope     router.CooldownScope
 }
 
-func (c *cooldownTrackingHandler) OnCooldown(ctx router.Context, remaining time.Duration, scope router.CooldownScope) {
+func (c *cooldownTrackingHandler) OnCooldown(
+	ctx router.Context,
+	remaining time.Duration,
+	scope router.CooldownScope,
+) {
 	c.cooldownCalled = true
 	c.cooldownRemaining = remaining
 	c.cooldownScope = scope

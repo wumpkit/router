@@ -236,7 +236,11 @@ func (r *Router) AutoSync(appID wumpkit.Snowflake, devGuildIDs ...wumpkit.Snowfl
 		return
 	}
 	r.client.OnReady(func(ctx context.Context, _ wumpkit.ReadyEvent) {
-		if err := r.SyncApplicationCommands(ctx, appID, devGuildIDs...); err != nil && r.logger != nil {
+		if err := r.SyncApplicationCommands(
+			ctx,
+			appID,
+			devGuildIDs...); err != nil &&
+			r.logger != nil {
 			r.logger.Error("failed syncing application commands", "error", err)
 		}
 	})
@@ -363,16 +367,29 @@ func (r *Router) HandleInteraction(ctx context.Context, e wumpkit.InteractionCre
 
 // SyncApplicationCommands registers all commands with Discord's Application Command REST API.
 // It automatically diffs against existing registered commands to prevent burning Discord rate limits.
-func (r *Router) SyncApplicationCommands(ctx context.Context, appID wumpkit.Snowflake, guildIDs ...wumpkit.Snowflake) error {
+func (r *Router) SyncApplicationCommands(
+	ctx context.Context,
+	appID wumpkit.Snowflake,
+	guildIDs ...wumpkit.Snowflake,
+) error {
 	return r.syncApplicationCommandsInternal(ctx, appID, false, guildIDs...)
 }
 
 // ForceSyncApplicationCommands unconditionally registers all commands with Discord's REST API, bypassing diffing.
-func (r *Router) ForceSyncApplicationCommands(ctx context.Context, appID wumpkit.Snowflake, guildIDs ...wumpkit.Snowflake) error {
+func (r *Router) ForceSyncApplicationCommands(
+	ctx context.Context,
+	appID wumpkit.Snowflake,
+	guildIDs ...wumpkit.Snowflake,
+) error {
 	return r.syncApplicationCommandsInternal(ctx, appID, true, guildIDs...)
 }
 
-func (r *Router) syncApplicationCommandsInternal(ctx context.Context, appID wumpkit.Snowflake, force bool, guildIDs ...wumpkit.Snowflake) error {
+func (r *Router) syncApplicationCommandsInternal(
+	ctx context.Context,
+	appID wumpkit.Snowflake,
+	force bool,
+	guildIDs ...wumpkit.Snowflake,
+) error {
 	if r.client == nil {
 		return fmt.Errorf("router: client is nil")
 	}
@@ -451,7 +468,11 @@ func (r *Router) resolvePrefixCommand(tokens []string) (ChatCommand, []string) {
 			if wumpkit.BitFieldHas(subCfg.DisabledIn, DisabledInMessage) {
 				continue
 			}
-			if strings.EqualFold(subCfg.Name, nextToken) || slices.ContainsFunc(subCfg.Aliases, func(a string) bool { return strings.EqualFold(a, nextToken) }) {
+			if strings.EqualFold(subCfg.Name, nextToken) ||
+				slices.ContainsFunc(
+					subCfg.Aliases,
+					func(a string) bool { return strings.EqualFold(a, nextToken) },
+				) {
 				cmd = sub
 				posIdx++
 				matched = true
@@ -466,7 +487,11 @@ func (r *Router) resolvePrefixCommand(tokens []string) (ChatCommand, []string) {
 	return cmd, tokens[posIdx:]
 }
 
-func (r *Router) bindMessageArgs(cmd ChatCommand, parsedInput *ParsedInput, msg *wumpkit.Message) (map[string]any, bindError) {
+func (r *Router) bindMessageArgs(
+	cmd ChatCommand,
+	parsedInput *ParsedInput,
+	msg *wumpkit.Message,
+) (map[string]any, bindError) {
 	cfg := cmd.Config()
 	if len(cfg.Args) == 0 && len(cfg.Flags) == 0 {
 		return nil, bindError{}
@@ -493,11 +518,23 @@ func (r *Router) bindMessageArgs(cmd ChatCommand, parsedInput *ParsedInput, msg 
 		}
 
 		if argDef.Endless {
-			if err := bindEndlessArg(argDef, parsedInput.Positional, &argPosIdx, vc, argValues); err != nil {
+			if err := bindEndlessArg(
+				argDef,
+				parsedInput.Positional,
+				&argPosIdx,
+				vc,
+				argValues,
+			); err != nil {
 				return nil, *err
 			}
 		} else {
-			if err := bindPositionalArg(argDef, parsedInput.Positional, &argPosIdx, vc, argValues); err != nil {
+			if err := bindPositionalArg(
+				argDef,
+				parsedInput.Positional,
+				&argPosIdx,
+				vc,
+				argValues,
+			); err != nil {
 				return nil, *err
 			}
 		}
@@ -512,7 +549,11 @@ func (r *Router) bindMessageArgs(cmd ChatCommand, parsedInput *ParsedInput, msg 
 	return argValues, bindError{}
 }
 
-func (r *Router) handleChatInputInteraction(ctx context.Context, e wumpkit.InteractionCreateEvent, it *wumpkit.ChatInputCommandInteraction) {
+func (r *Router) handleChatInputInteraction(
+	ctx context.Context,
+	e wumpkit.InteractionCreateEvent,
+	it *wumpkit.ChatInputCommandInteraction,
+) {
 	cmd, ok := r.GetCommand(it.Data.Name)
 	if !ok || wumpkit.BitFieldHas(cmd.Config().DisabledIn, DisabledInSlash) {
 		return
@@ -552,7 +593,11 @@ func (r *Router) handleChatInputInteraction(ctx context.Context, e wumpkit.Inter
 	})
 }
 
-func (r *Router) handleUserContextMenuCommandInteraction(ctx context.Context, e wumpkit.InteractionCreateEvent, it *wumpkit.UserContextMenuCommandInteraction) {
+func (r *Router) handleUserContextMenuCommandInteraction(
+	ctx context.Context,
+	e wumpkit.InteractionCreateEvent,
+	it *wumpkit.UserContextMenuCommandInteraction,
+) {
 	cmd, ok := r.GetUserContextMenuCommand(it.Data.Name)
 	if !ok {
 		return
@@ -577,7 +622,11 @@ func (r *Router) handleUserContextMenuCommandInteraction(ctx context.Context, e 
 	})
 }
 
-func (r *Router) handleMessageContextMenuCommandInteraction(ctx context.Context, e wumpkit.InteractionCreateEvent, it *wumpkit.MessageContextMenuCommandInteraction) {
+func (r *Router) handleMessageContextMenuCommandInteraction(
+	ctx context.Context,
+	e wumpkit.InteractionCreateEvent,
+	it *wumpkit.MessageContextMenuCommandInteraction,
+) {
 	cmd, ok := r.GetMessageContextMenuCommand(it.Data.Name)
 	if !ok {
 		return
@@ -602,7 +651,11 @@ func (r *Router) handleMessageContextMenuCommandInteraction(ctx context.Context,
 	})
 }
 
-func (r *Router) handleAutoCompleteInteraction(ctx context.Context, _ wumpkit.InteractionCreateEvent, it *wumpkit.AutoCompleteInteraction) {
+func (r *Router) handleAutoCompleteInteraction(
+	ctx context.Context,
+	_ wumpkit.InteractionCreateEvent,
+	it *wumpkit.AutoCompleteInteraction,
+) {
 	cmdName := it.Data.Name
 
 	focused := findFocusedOption(it.Data.Options)
@@ -613,7 +666,15 @@ func (r *Router) handleAutoCompleteInteraction(ctx context.Context, _ wumpkit.In
 
 	if handler, ok := r.GetAutocompleteHandler(cmdName, optName); ok {
 		if err := handler(ctx, it); err != nil && r.logger != nil {
-			r.logger.Error("autocomplete handler failed", "command", cmdName, "option", optName, "error", err.Error())
+			r.logger.Error(
+				"autocomplete handler failed",
+				"command",
+				cmdName,
+				"option",
+				optName,
+				"error",
+				err.Error(),
+			)
 		}
 		return
 	}
@@ -626,13 +687,25 @@ func (r *Router) handleAutoCompleteInteraction(ctx context.Context, _ wumpkit.In
 
 		if completer, ok := leafCmd.(Autocompleter); ok {
 			if err := completer.Autocomplete(ctx, it); err != nil && r.logger != nil {
-				r.logger.Error("command autocomplete failed", "command", cmdName, "option", optName, "error", err.Error())
+				r.logger.Error(
+					"command autocomplete failed",
+					"command",
+					cmdName,
+					"option",
+					optName,
+					"error",
+					err.Error(),
+				)
 			}
 		}
 	}
 }
 
-func (r *Router) handleComponentInteraction(ctx context.Context, e wumpkit.InteractionCreateEvent, it *wumpkit.ComponentInteraction) {
+func (r *Router) handleComponentInteraction(
+	ctx context.Context,
+	e wumpkit.InteractionCreateEvent,
+	it *wumpkit.ComponentInteraction,
+) {
 	if it.Data.ComponentType == wumpkit.ComponentTypeButton {
 		r.dispatchButtonInteraction(ctx, e, it)
 	} else {
@@ -640,11 +713,19 @@ func (r *Router) handleComponentInteraction(ctx context.Context, e wumpkit.Inter
 	}
 }
 
-func (r *Router) dispatchButtonInteraction(ctx context.Context, e wumpkit.InteractionCreateEvent, it *wumpkit.ComponentInteraction) {
+func (r *Router) dispatchButtonInteraction(
+	ctx context.Context,
+	e wumpkit.InteractionCreateEvent,
+	it *wumpkit.ComponentInteraction,
+) {
 	m, ok := r.MatchButtonCommand(it.Data.CustomID)
 	if !ok || m.Value == nil {
 		if r.logger != nil {
-			r.logger.Debug("button interaction received with no registered command", "custom_id", it.Data.CustomID)
+			r.logger.Debug(
+				"button interaction received with no registered command",
+				"custom_id",
+				it.Data.CustomID,
+			)
 		}
 		return
 	}
@@ -673,11 +754,19 @@ func (r *Router) dispatchButtonInteraction(ctx context.Context, e wumpkit.Intera
 	})
 }
 
-func (r *Router) dispatchSelectMenuInteraction(ctx context.Context, e wumpkit.InteractionCreateEvent, it *wumpkit.ComponentInteraction) {
+func (r *Router) dispatchSelectMenuInteraction(
+	ctx context.Context,
+	e wumpkit.InteractionCreateEvent,
+	it *wumpkit.ComponentInteraction,
+) {
 	m, ok := r.MatchSelectMenuCommand(it.Data.CustomID)
 	if !ok || m.Value == nil {
 		if r.logger != nil {
-			r.logger.Debug("select menu interaction received with no registered command", "custom_id", it.Data.CustomID)
+			r.logger.Debug(
+				"select menu interaction received with no registered command",
+				"custom_id",
+				it.Data.CustomID,
+			)
 		}
 		return
 	}
@@ -706,11 +795,19 @@ func (r *Router) dispatchSelectMenuInteraction(ctx context.Context, e wumpkit.In
 	})
 }
 
-func (r *Router) handleModalSubmitInteraction(ctx context.Context, e wumpkit.InteractionCreateEvent, it *wumpkit.ModalSubmitInteraction) {
+func (r *Router) handleModalSubmitInteraction(
+	ctx context.Context,
+	e wumpkit.InteractionCreateEvent,
+	it *wumpkit.ModalSubmitInteraction,
+) {
 	m, found := r.MatchModalCommand(it.Data.CustomID)
 	if !found || m.Value == nil {
 		if r.logger != nil {
-			r.logger.Debug("modal interaction received with no registered command", "custom_id", it.Data.CustomID)
+			r.logger.Debug(
+				"modal interaction received with no registered command",
+				"custom_id",
+				it.Data.CustomID,
+			)
 		}
 		return
 	}
@@ -739,7 +836,10 @@ func (r *Router) handleModalSubmitInteraction(ctx context.Context, e wumpkit.Int
 	})
 }
 
-func (r *Router) traverseSlashSubcommands(cmd ChatCommand, options []wumpkit.ChatInputInteractionCommandOption) (ChatCommand, []wumpkit.ChatInputInteractionCommandOption) {
+func (r *Router) traverseSlashSubcommands(
+	cmd ChatCommand,
+	options []wumpkit.ChatInputInteractionCommandOption,
+) (ChatCommand, []wumpkit.ChatInputInteractionCommandOption) {
 	targetCmd := cmd
 	opts := options
 
@@ -840,7 +940,10 @@ func (r *Router) checkContextExclusion(cmd any, ctx Context) (ExcludedIn, bool) 
 		}
 	}
 
-	if f := getInteractionFields(ctx.Interaction()); f != nil && (f.ChannelID != 0 || f.Channel.ID != 0) {
+	if f := getInteractionFields(
+		ctx.Interaction(),
+	); f != nil &&
+		(f.ChannelID != 0 || f.Channel.ID != 0) {
 		if excluded, ok := matchChannelTypeExclusion(cfg.ExcludedIn, f.Channel.Type); ok {
 			return excluded, true
 		}
@@ -849,7 +952,13 @@ func (r *Router) checkContextExclusion(cmd any, ctx Context) (ExcludedIn, bool) 
 	return 0, false
 }
 
-func (r *Router) syncGuildCommands(ctx context.Context, appID wumpkit.Snowflake, guildIDs []wumpkit.Snowflake, appCommands []wumpkit.ApplicationCommand, force bool) error {
+func (r *Router) syncGuildCommands(
+	ctx context.Context,
+	appID wumpkit.Snowflake,
+	guildIDs []wumpkit.Snowflake,
+	appCommands []wumpkit.ApplicationCommand,
+	force bool,
+) error {
 	for _, gID := range guildIDs {
 		if !force {
 			existing, err := r.client.FetchGuildApplicationCommands(ctx, appID, gID)
@@ -888,7 +997,12 @@ func (r *Router) syncGuildCommands(ctx context.Context, appID wumpkit.Snowflake,
 	return nil
 }
 
-func (r *Router) syncGlobalCommands(ctx context.Context, appID wumpkit.Snowflake, appCommands []wumpkit.ApplicationCommand, force bool) error {
+func (r *Router) syncGlobalCommands(
+	ctx context.Context,
+	appID wumpkit.Snowflake,
+	appCommands []wumpkit.ApplicationCommand,
+	force bool,
+) error {
 	if !force {
 		existing, err := r.client.FetchGlobalApplicationCommands(ctx, appID)
 		if err == nil && applicationCommandsEqual(existing, appCommands) {
@@ -943,18 +1057,34 @@ func (r *Router) resolveMessageGuildPermissions(msgCtx *MessageCommandContext) {
 	member, err := r.client.Member(msgCtx.Context, *guildID, authorID)
 	if err == nil {
 		msgCtx.SetAuthorMember(&member)
-		userPerms := computeGuildPermissions(authorID, guild.OwnerID, guild.ID, roles, member.RoleIDs)
+		userPerms := computeGuildPermissions(
+			authorID,
+			guild.OwnerID,
+			guild.ID,
+			roles,
+			member.RoleIDs,
+		)
 		msgCtx.SetUserPermissions(userPerms)
 	}
 
 	botMember, err := r.client.FetchCurrentUserGuildMember(msgCtx.Context, *guildID)
 	if err == nil {
-		appPerms := computeGuildPermissions(botMember.ID, guild.OwnerID, guild.ID, roles, botMember.RoleIDs)
+		appPerms := computeGuildPermissions(
+			botMember.ID,
+			guild.OwnerID,
+			guild.ID,
+			roles,
+			botMember.RoleIDs,
+		)
 		msgCtx.SetAppPermissions(appPerms)
 	}
 }
 
-func computeGuildPermissions(userID, ownerID, guildID wumpkit.Snowflake, roles map[wumpkit.Snowflake]wumpkit.Role, memberRoleIDs []wumpkit.Snowflake) wumpkit.Permissions {
+func computeGuildPermissions(
+	userID, ownerID, guildID wumpkit.Snowflake,
+	roles map[wumpkit.Snowflake]wumpkit.Role,
+	memberRoleIDs []wumpkit.Snowflake,
+) wumpkit.Permissions {
 	if userID != 0 && userID == ownerID {
 		return ^wumpkit.Permissions(0)
 	}
@@ -1121,7 +1251,12 @@ func (vc valueConstraints) validate(val any, rawVal string, isNumeric bool) bool
 	return true
 }
 
-func bindAttachmentArg(argDef ArgDef, msg *wumpkit.Message, attachmentIdx *int, out map[string]any) *bindError {
+func bindAttachmentArg(
+	argDef ArgDef,
+	msg *wumpkit.Message,
+	attachmentIdx *int,
+	out map[string]any,
+) *bindError {
 	if msg != nil && *attachmentIdx < len(msg.Attachments) {
 		att := msg.Attachments[*attachmentIdx]
 		*attachmentIdx++
@@ -1141,7 +1276,13 @@ func bindAttachmentArg(argDef ArgDef, msg *wumpkit.Message, attachmentIdx *int, 
 	return nil
 }
 
-func bindEndlessArg(argDef ArgDef, positional []string, posIdx *int, vc valueConstraints, out map[string]any) *bindError {
+func bindEndlessArg(
+	argDef ArgDef,
+	positional []string,
+	posIdx *int,
+	vc valueConstraints,
+	out map[string]any,
+) *bindError {
 	if *posIdx < len(positional) {
 		endlessStr := strings.Join(positional[*posIdx:], " ")
 		if !vc.validate(endlessStr, endlessStr, false) {
@@ -1182,7 +1323,13 @@ func bindEndlessArg(argDef ArgDef, positional []string, posIdx *int, vc valueCon
 	return nil
 }
 
-func bindPositionalArg(argDef ArgDef, positional []string, posIdx *int, vc valueConstraints, out map[string]any) *bindError {
+func bindPositionalArg(
+	argDef ArgDef,
+	positional []string,
+	posIdx *int,
+	vc valueConstraints,
+	out map[string]any,
+) *bindError {
 	if *posIdx < len(positional) {
 		valStr := positional[*posIdx]
 		*posIdx++
@@ -1250,7 +1397,9 @@ func bindFlag(flagDef FlagDef, parsedFlags map[string]string, out map[string]any
 	return nil
 }
 
-func findFocusedOption(options []wumpkit.ChatInputInteractionCommandOption) *wumpkit.ChatInputInteractionCommandOption {
+func findFocusedOption(
+	options []wumpkit.ChatInputInteractionCommandOption,
+) *wumpkit.ChatInputInteractionCommandOption {
 	for i := range options {
 		if options[i].Focused {
 			return &options[i]
@@ -1268,7 +1417,8 @@ func decodeOptionValue(opt wumpkit.ChatInputInteractionCommandOption) any {
 	switch opt.Type {
 	case wumpkit.ApplicationCommandOptionTypeString:
 		raw := opt.Value
-		if len(raw) >= 2 && raw[0] == '"' && raw[len(raw)-1] == '"' && !bytes.ContainsRune(raw, '\\') {
+		if len(raw) >= 2 && raw[0] == '"' && raw[len(raw)-1] == '"' &&
+			!bytes.ContainsRune(raw, '\\') {
 			return string(raw[1 : len(raw)-1])
 		}
 		var s string
@@ -1312,7 +1462,10 @@ func decodeOptionValue(opt wumpkit.ChatInputInteractionCommandOption) any {
 	return opt.Value
 }
 
-func matchChannelTypeExclusion(excludedIn ExcludedIn, channelType wumpkit.ChannelType) (ExcludedIn, bool) {
+func matchChannelTypeExclusion(
+	excludedIn ExcludedIn,
+	channelType wumpkit.ChannelType,
+) (ExcludedIn, bool) {
 	switch {
 	case wumpkit.BitFieldHas(excludedIn, ExcludeGroupDM) && channelType == wumpkit.ChannelTypeGroupDM:
 		return ExcludeGroupDM, true

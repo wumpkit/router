@@ -502,10 +502,14 @@ func TestRouter_Autocomplete(t *testing.T) {
 	r := New()
 
 	var hookCalled bool
-	r.OnAutocomplete("tags", "query", func(ctx context.Context, inter *wumpkit.AutoCompleteInteraction) error {
-		hookCalled = true
-		return nil
-	})
+	r.OnAutocomplete(
+		"tags",
+		"query",
+		func(ctx context.Context, inter *wumpkit.AutoCompleteInteraction) error {
+			hookCalled = true
+			return nil
+		},
+	)
 
 	autoCmd := &mockAutoCommand{
 		mockCommand: mockCommand{
@@ -916,10 +920,12 @@ func TestRouter_PermissionResolver(t *testing.T) {
 	var resolverCalled bool
 	r := New(
 		WithPrefix("!"),
-		WithPermissionResolver(func(ctx Context) (userPerms, appPerms wumpkit.Permissions, err error) {
-			resolverCalled = true
-			return customUserPerms, customAppPerms, nil
-		}),
+		WithPermissionResolver(
+			func(ctx Context) (userPerms, appPerms wumpkit.Permissions, err error) {
+				resolverCalled = true
+				return customUserPerms, customAppPerms, nil
+			},
+		),
 	)
 
 	var (
@@ -985,7 +991,11 @@ func TestRouter_ExecutePipelinePanicRecovery(t *testing.T) {
 
 	assert.True(t, handler.executionErrorCalled)
 	require.NotNil(t, handler.lastErr)
-	assert.Contains(t, handler.lastErr.Error(), "router: panic recovered during command execution: intentional disaster")
+	assert.Contains(
+		t,
+		handler.lastErr.Error(),
+		"router: panic recovered during command execution: intentional disaster",
+	)
 }
 
 func TestComputeGuildPermissions(t *testing.T) {
@@ -1019,7 +1029,13 @@ func TestComputeGuildPermissions(t *testing.T) {
 
 	// member with administrator gets all permissions
 	adminMemberID := wumpkit.Snowflake(400)
-	perms = computeGuildPermissions(adminMemberID, ownerID, guildID, roles, []wumpkit.Snowflake{102})
+	perms = computeGuildPermissions(
+		adminMemberID,
+		ownerID,
+		guildID,
+		roles,
+		[]wumpkit.Snowflake{102},
+	)
 	assert.Equal(t, ^wumpkit.Permissions(0), perms)
 }
 
@@ -1032,7 +1048,13 @@ func TestApplicationCommandsEqual(t *testing.T) {
 	cmdB := wumpkit.NewSlashCommandBuilder("ping", "Replies with pong").
 		AddStringOption("msg", "Optional message", false).
 		Build()
-	assert.True(t, applicationCommandsEqual([]wumpkit.ApplicationCommand{cmdA}, []wumpkit.ApplicationCommand{cmdB}))
+	assert.True(
+		t,
+		applicationCommandsEqual(
+			[]wumpkit.ApplicationCommand{cmdA},
+			[]wumpkit.ApplicationCommand{cmdB},
+		),
+	)
 
 	// different lengths
 	assert.False(t, applicationCommandsEqual([]wumpkit.ApplicationCommand{cmdA}, nil))
@@ -1041,20 +1063,38 @@ func TestApplicationCommandsEqual(t *testing.T) {
 	cmdC := wumpkit.NewSlashCommandBuilder("ping", "Something different").
 		AddStringOption("msg", "Optional message", false).
 		Build()
-	assert.False(t, applicationCommandsEqual([]wumpkit.ApplicationCommand{cmdA}, []wumpkit.ApplicationCommand{cmdC}))
+	assert.False(
+		t,
+		applicationCommandsEqual(
+			[]wumpkit.ApplicationCommand{cmdA},
+			[]wumpkit.ApplicationCommand{cmdC},
+		),
+	)
 
 	// modified options
 	cmdD := wumpkit.NewSlashCommandBuilder("ping", "Replies with pong").
 		AddIntegerOption("msg", "Optional message", false).
 		Build()
-	assert.False(t, applicationCommandsEqual([]wumpkit.ApplicationCommand{cmdA}, []wumpkit.ApplicationCommand{cmdD}))
+	assert.False(
+		t,
+		applicationCommandsEqual(
+			[]wumpkit.ApplicationCommand{cmdA},
+			[]wumpkit.ApplicationCommand{cmdD},
+		),
+	)
 
 	// modified default member permissions
 	cmdE := wumpkit.NewSlashCommandBuilder("ping", "Replies with pong").
 		SetDefaultMemberPermissions(wumpkit.PermissionManageChannels).
 		AddStringOption("msg", "Optional message", false).
 		Build()
-	assert.False(t, applicationCommandsEqual([]wumpkit.ApplicationCommand{cmdA}, []wumpkit.ApplicationCommand{cmdE}))
+	assert.False(
+		t,
+		applicationCommandsEqual(
+			[]wumpkit.ApplicationCommand{cmdA},
+			[]wumpkit.ApplicationCommand{cmdE},
+		),
+	)
 
 	// multiple commands in different order should still be equal
 	cmd2 := wumpkit.NewSlashCommandBuilder("help", "Help command").Build()
