@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -20,9 +21,11 @@ type Page struct {
 	Content  string
 }
 
-var frontmatterRegex = regexp.MustCompile(`(?s)^---\r?\n(.*?)\r?\n---\r?\n?`)
-var titleRegex = regexp.MustCompile(`(?m)^title:\s*["']?(.*?)["']?$`)
-var weightRegex = regexp.MustCompile(`(?m)^weight:\s*(\d+)$`)
+var (
+	frontmatterRegex = regexp.MustCompile(`(?s)^---\r?\n(.*?)\r?\n---\r?\n?`)
+	titleRegex       = regexp.MustCompile(`(?m)^title:\s*["']?(.*?)["']?$`)
+	weightRegex      = regexp.MustCompile(`(?m)^weight:\s*(\d+)$`)
+)
 
 func main() {
 	contentDir := flag.String("content", "docs/content", "path to hugo content directory")
@@ -50,14 +53,14 @@ func main() {
 		return
 	}
 
-	if err := os.MkdirAll(*targetDir, 0755); err != nil {
+	if err := os.MkdirAll(*targetDir, 0o755); err != nil {
 		fmt.Printf("failed creating target dir: %v\n", err)
 		os.Exit(1)
 	}
 
 	for _, p := range pages {
 		destPath := filepath.Join(*targetDir, p.WikiName+".md")
-		if err := os.WriteFile(destPath, []byte(p.Content), 0644); err != nil {
+		if err := os.WriteFile(destPath, []byte(p.Content), 0o644); err != nil {
 			fmt.Printf("failed writing %s: %v\n", destPath, err)
 			os.Exit(1)
 		}
@@ -65,7 +68,7 @@ func main() {
 	}
 
 	sidebarPath := filepath.Join(*targetDir, "_Sidebar.md")
-	if err := os.WriteFile(sidebarPath, []byte(sidebarContent), 0644); err != nil {
+	if err := os.WriteFile(sidebarPath, []byte(sidebarContent), 0o644); err != nil {
 		fmt.Printf("failed writing _Sidebar.md: %v\n", err)
 		os.Exit(1)
 	}
@@ -75,6 +78,8 @@ func main() {
 func scanContent(root string) ([]Page, []string, error) {
 	var pages []Page
 	sectionsSet := make(map[string]bool)
+	sectionWeights := make(map[string]int)
+	sectionTitles := make(map[string]string)
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil || info.IsDir() || !strings.HasSuffix(info.Name(), ".md") {
@@ -92,8 +97,14 @@ func scanContent(root string) ([]Page, []string, error) {
 		section := ""
 		dir := filepath.Dir(rel)
 		if dir != "." {
-			section = cleanSectionName(dir)
+			section = dir
 			sectionsSet[section] = true
+			if info.Name() == "_index.md" {
+				sectionWeights[section] = weight
+				if title != "" && title != "_index" {
+					sectionTitles[section] = title
+				}
+			}
 		}
 
 		wikiName := toWikiName(rel, info.Name(), section)
@@ -114,9 +125,38 @@ func scanContent(root string) ([]Page, []string, error) {
 	for s := range sectionsSet {
 		sections = append(sections, s)
 	}
-	sort.Strings(sections)
+	sort.Slice(sections, func(i, j int) bool {
+		wi, okI := sectionWeights[sections[i]]
+		if !okI {
+			wi = 99
+		}
+		wj, okJ := sectionWeights[sections[j]]
+		if !okJ {
+			wj = 99
+		}
+		if wi != wj {
+			return wi < wj
+		}
+		return sections[i] < sections[j]
+	})
 
-	return pages, sections, err
+	// replace directory keys with human titles if available
+	var finalSections []string
+	for _, sec := range sections {
+		displayTitle := sectionTitles[sec]
+		if displayTitle == "" {
+			displayTitle = cleanSectionName(sec)
+		}
+		finalSections = append(finalSections, displayTitle)
+		// update page sections to match displayTitle
+		for idx := range pages {
+			if pages[idx].Section == sec {
+				pages[idx].Section = displayTitle
+			}
+		}
+	}
+
+	return pages, finalSections, err
 }
 
 func parseMarkdown(raw, fileName string) (string, string, int) {
@@ -133,7 +173,9 @@ func parseMarkdown(raw, fileName string) (string, string, int) {
 			title = tm[1]
 		}
 		if wm := weightRegex.FindStringSubmatch(fm); len(wm) > 1 {
-			fmt.Sscanf(wm[1], "%d", &weight)
+			if w, err := strconv.Atoi(wm[1]); err == nil {
+				weight = w
+			}
 		}
 	}
 
@@ -178,7 +220,7 @@ func generateSidebar(pages []Page, sections []string) string {
 	sb.WriteString("### [Overview](Home)\n\n")
 
 	for _, sec := range sections {
-		sb.WriteString(fmt.Sprintf("### %s\n", sec))
+		fmt.Fprintf(&sb, "### %s\n", sec)
 		var secPages []Page
 		for _, p := range pages {
 			if p.Section == sec && !strings.HasSuffix(p.RelPath, "_index.md") {
@@ -193,7 +235,7 @@ func generateSidebar(pages []Page, sections []string) string {
 		})
 
 		for _, p := range secPages {
-			sb.WriteString(fmt.Sprintf("- [%s](%s)\n", p.Title, p.WikiName))
+			fmt.Fprintf(&sb, "- [%s](%s)\n", p.Title, p.WikiName)
 		}
 		sb.WriteString("\n")
 	}

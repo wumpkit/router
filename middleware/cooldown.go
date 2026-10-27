@@ -9,7 +9,10 @@ import (
 )
 
 // cooldownWithStore creates a middleware enforcing rate limits via a custom CooldownStore
-func CooldownWithStore(store router.CooldownStore, customHandler ...router.CommandErrorHandler) router.Middleware {
+func CooldownWithStore(
+	store router.CooldownStore,
+	customHandler ...router.CommandErrorHandler,
+) router.Middleware {
 	var eh router.CommandErrorHandler
 	if len(customHandler) > 0 {
 		eh = customHandler[0]
@@ -110,7 +113,12 @@ func Cooldown(customHandler ...router.CommandErrorHandler) router.Middleware {
 				if rule.Duration > 0 {
 					emissionInterval, burstTolerance := ruleParams(rule)
 					bucketKey := getCooldownBucketKey(cfg.Name, rule.Scope, 0, ctx)
-					nextTAT, remaining, exceeded := evalGCRA(nowNano, emissionInterval, burstTolerance, buckets[bucketKey])
+					nextTAT, remaining, exceeded := evalGCRA(
+						nowNano,
+						emissionInterval,
+						burstTolerance,
+						buckets[bucketKey],
+					)
 
 					if exceeded {
 						mu.Unlock()
@@ -144,7 +152,12 @@ func Cooldown(customHandler ...router.CommandErrorHandler) router.Middleware {
 
 				emissionInterval, burstTolerance := ruleParams(rule)
 				bucketKey := getCooldownBucketKey(cfg.Name, rule.Scope, ruleIdx, ctx)
-				nextTAT, remaining, exceeded := evalGCRA(nowNano, emissionInterval, burstTolerance, buckets[bucketKey])
+				nextTAT, remaining, exceeded := evalGCRA(
+					nowNano,
+					emissionInterval,
+					burstTolerance,
+					buckets[bucketKey],
+				)
 
 				if exceeded {
 					mu.Unlock()
@@ -188,7 +201,9 @@ func ruleParams(rule router.CooldownRule) (int64, int64) {
 	return emissionInterval, burstTolerance
 }
 
-func evalGCRA(nowNano, emissionInterval, burstTolerance, storedTAT int64) (int64, time.Duration, bool) {
+func evalGCRA(
+	nowNano, emissionInterval, burstTolerance, storedTAT int64,
+) (int64, time.Duration, bool) {
 	tat := max(storedTAT, nowNano)
 	nextTAT := tat + emissionInterval
 	if nextTAT-nowNano > burstTolerance {
@@ -198,7 +213,12 @@ func evalGCRA(nowNano, emissionInterval, burstTolerance, storedTAT int64) (int64
 	return nextTAT, 0, false
 }
 
-func getCooldownBucketKey(cmdName string, scope router.CooldownScope, ruleIdx int, ctx router.Context) string {
+func getCooldownBucketKey(
+	cmdName string,
+	scope router.CooldownScope,
+	ruleIdx int,
+	ctx router.Context,
+) string {
 	idxStr := strconv.Itoa(ruleIdx)
 	switch scope {
 	case router.CooldownScopeGuild:

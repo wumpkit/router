@@ -382,7 +382,12 @@ func (a Args) SnowflakeE(name string) (wumpkit.Snowflake, error) {
 	case string:
 		id, err := parseMentionOrSnowflake(val)
 		if err != nil {
-			return 0, fmt.Errorf("router: argument %q value %q is not a valid Snowflake: %w", name, val, err)
+			return 0, fmt.Errorf(
+				"router: argument %q value %q is not a valid Snowflake: %w",
+				name,
+				val,
+				err,
+			)
 		}
 		return id, nil
 	case json.RawMessage:
@@ -390,7 +395,12 @@ func (a Args) SnowflakeE(name string) (wumpkit.Snowflake, error) {
 		if err := json.Unmarshal(val, &s); err == nil {
 			id, err := parseMentionOrSnowflake(s)
 			if err != nil {
-				return 0, fmt.Errorf("router: argument %q value %q is not a valid Snowflake: %w", name, s, err)
+				return 0, fmt.Errorf(
+					"router: argument %q value %q is not a valid Snowflake: %w",
+					name,
+					s,
+					err,
+				)
 			}
 			return id, nil
 		}
@@ -398,17 +408,30 @@ func (a Args) SnowflakeE(name string) (wumpkit.Snowflake, error) {
 		if err := json.Unmarshal(val, &sf); err == nil && sf > 0 {
 			return sf, nil
 		}
-		return 0, fmt.Errorf("router: argument %q value %q is not a valid Snowflake", name, string(val))
+		return 0, fmt.Errorf(
+			"router: argument %q value %q is not a valid Snowflake",
+			name,
+			string(val),
+		)
 	case []byte:
 		var s string
 		if err := json.Unmarshal(val, &s); err == nil {
 			id, err := parseMentionOrSnowflake(s)
 			if err != nil {
-				return 0, fmt.Errorf("router: argument %q value %q is not a valid Snowflake: %w", name, s, err)
+				return 0, fmt.Errorf(
+					"router: argument %q value %q is not a valid Snowflake: %w",
+					name,
+					s,
+					err,
+				)
 			}
 			return id, nil
 		}
-		return 0, fmt.Errorf("router: argument %q value %q is not a valid Snowflake", name, string(val))
+		return 0, fmt.Errorf(
+			"router: argument %q value %q is not a valid Snowflake",
+			name,
+			string(val),
+		)
 	default:
 		return 0, fmt.Errorf("router: argument %q is %T, cannot convert to Snowflake", name, v)
 	}
@@ -438,7 +461,11 @@ func (a Args) AttachmentE(name string) (wumpkit.Attachment, error) {
 		}
 		return wumpkit.Attachment{}, nil
 	default:
-		return wumpkit.Attachment{}, fmt.Errorf("router: argument %q is %T, cannot convert to Attachment", name, v)
+		return wumpkit.Attachment{}, fmt.Errorf(
+			"router: argument %q is %T, cannot convert to Attachment",
+			name,
+			v,
+		)
 	}
 }
 
@@ -525,7 +552,12 @@ func (f Flags) FloatE(name string) (float64, error) {
 	}
 	flt, err := strconv.ParseFloat(val, 64)
 	if err != nil {
-		return 0, fmt.Errorf("router: flag %q value %q cannot be parsed as float64: %w", name, val, err)
+		return 0, fmt.Errorf(
+			"router: flag %q value %q cannot be parsed as float64: %w",
+			name,
+			val,
+			err,
+		)
 	}
 	return flt, nil
 }
@@ -547,7 +579,12 @@ func (f Flags) BoolE(name string) (bool, error) {
 	}
 	b, err := parseBoolValue(val)
 	if err != nil {
-		return false, fmt.Errorf("router: flag %q value %q cannot be parsed as bool: %w", name, val, err)
+		return false, fmt.Errorf(
+			"router: flag %q value %q cannot be parsed as bool: %w",
+			name,
+			val,
+			err,
+		)
 	}
 	return b, nil
 }
@@ -569,7 +606,12 @@ func (f Flags) SnowflakeE(name string) (wumpkit.Snowflake, error) {
 	}
 	id, err := parseMentionOrSnowflake(val)
 	if err != nil {
-		return 0, fmt.Errorf("router: flag %q value %q is not a valid Snowflake: %w", name, val, err)
+		return 0, fmt.Errorf(
+			"router: flag %q value %q is not a valid Snowflake: %w",
+			name,
+			val,
+			err,
+		)
 	}
 	return id, nil
 }
@@ -590,7 +632,12 @@ func parseArgType(val string, t ArgType) (any, error) {
 		return strconv.ParseFloat(val, 64)
 	case ArgTypeBool:
 		return parseBoolValue(val)
-	case ArgTypeUser, ArgTypeMember, ArgTypeRole, ArgTypeChannel, ArgTypeMentionable, ArgTypeAttachment:
+	case ArgTypeUser,
+		ArgTypeMember,
+		ArgTypeRole,
+		ArgTypeChannel,
+		ArgTypeMentionable,
+		ArgTypeAttachment:
 		return parseMentionOrSnowflake(val)
 	default:
 		return val, nil
@@ -625,7 +672,7 @@ func parseBoolValue(val string) (bool, error) {
 }
 
 func parseMentionOrSnowflake(val string) (wumpkit.Snowflake, error) {
-	var prefixes = [4]string{"@!", "@&", "@", "#"}
+	prefixes := [4]string{"@!", "@&", "@", "#"}
 	s := strings.Trim(val, "<>")
 	for _, p := range prefixes {
 		s = strings.TrimPrefix(s, p)

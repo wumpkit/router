@@ -5,7 +5,6 @@ import (
 	"errors"
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -190,15 +189,4 @@ func TestRouter_DynamicPrefix(t *testing.T) {
 		},
 	})
 	assert.True(t, called)
-}
-
-type mockCooldownStore struct {
-	allowFunc func(key string, limit int, duration time.Duration) (bool, time.Duration, error)
-}
-
-func (m *mockCooldownStore) Allow(key string, limit int, duration time.Duration) (bool, time.Duration, error) {
-	if m.allowFunc != nil {
-		return m.allowFunc(key, limit, duration)
-	}
-	return true, 0, nil
 }

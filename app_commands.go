@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/wumpkit/wumpkit"
@@ -25,9 +26,11 @@ func buildSlashCommand(cmd ChatCommand) (wumpkit.ApplicationCommand, bool) {
 	builder := wumpkit.NewSlashCommandBuilder(name, desc).
 		SetNSFW(cfg.NSFW)
 
-	if wumpkit.BitFieldHas(cfg.ExcludedIn, ExcludeDM) && !wumpkit.BitFieldHas(cfg.ExcludedIn, ExcludeGuild) {
+	if wumpkit.BitFieldHas(cfg.ExcludedIn, ExcludeDM) &&
+		!wumpkit.BitFieldHas(cfg.ExcludedIn, ExcludeGuild) {
 		builder.SetContexts(wumpkit.InteractionContextTypeGuild)
-	} else if wumpkit.BitFieldHas(cfg.ExcludedIn, ExcludeGuild) && !wumpkit.BitFieldHas(cfg.ExcludedIn, ExcludeDM) {
+	} else if wumpkit.BitFieldHas(cfg.ExcludedIn, ExcludeGuild) &&
+		!wumpkit.BitFieldHas(cfg.ExcludedIn, ExcludeDM) {
 		builder.SetContexts(wumpkit.InteractionContextTypeBotDM)
 	}
 
@@ -75,7 +78,9 @@ func buildMessageCommand(cmd MessageContextMenuCommand) wumpkit.ApplicationComma
 	return builder.Build()
 }
 
-func buildSubcommandGroupOption(group ChatCommand) *wumpkit.ApplicationCommandOptionSubCommandGroup {
+func buildSubcommandGroupOption(
+	group ChatCommand,
+) *wumpkit.ApplicationCommandOptionSubCommandGroup {
 	cfg := group.Config()
 	desc := cfg.Description
 	if desc == "" {
@@ -292,7 +297,9 @@ func buildIntegerChoices(choices []Choice) []wumpkit.ApplicationCommandOptionCho
 		case float64:
 			intVal = int(v)
 		default:
-			fmt.Sscanf(fmt.Sprint(c.Value), "%d", &intVal)
+			if val, err := strconv.Atoi(fmt.Sprint(c.Value)); err == nil {
+				intVal = val
+			}
 		}
 		res = append(res, wumpkit.ApplicationCommandOptionChoiceInteger{
 			ChoiceOptionBase: wumpkit.ChoiceOptionBase{
@@ -318,7 +325,9 @@ func buildFloatChoices(choices []Choice) []wumpkit.ApplicationCommandOptionChoic
 		case int64:
 			floatVal = float64(v)
 		default:
-			fmt.Sscanf(fmt.Sprint(c.Value), "%f", &floatVal)
+			if val, err := strconv.ParseFloat(fmt.Sprint(c.Value), 64); err == nil {
+				floatVal = val
+			}
 		}
 		res = append(res, wumpkit.ApplicationCommandOptionChoiceFloat{
 			ChoiceOptionBase: wumpkit.ChoiceOptionBase{

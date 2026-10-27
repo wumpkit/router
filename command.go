@@ -214,25 +214,9 @@ func ExtractCommonConfig(cmd any) CommonConfig {
 			ExcludedIn:      cfg.ExcludedIn,
 		}
 	case UserContextMenuCommand:
-		cfg := c.Config()
-		return CommonConfig{
-			Name:            cfg.Name,
-			GuildID:         cfg.GuildID,
-			UserPermissions: cfg.UserPermissions,
-			AppPermissions:  cfg.AppPermissions,
-			Cooldowns:       cfg.Cooldowns,
-			ExcludedIn:      cfg.ExcludedIn,
-		}
+		return CommonConfig(c.Config())
 	case MessageContextMenuCommand:
-		cfg := c.Config()
-		return CommonConfig{
-			Name:            cfg.Name,
-			GuildID:         cfg.GuildID,
-			UserPermissions: cfg.UserPermissions,
-			AppPermissions:  cfg.AppPermissions,
-			Cooldowns:       cfg.Cooldowns,
-			ExcludedIn:      cfg.ExcludedIn,
-		}
+		return CommonConfig(c.Config())
 	case ButtonCommand:
 		cfg := c.Config()
 		return CommonConfig{
