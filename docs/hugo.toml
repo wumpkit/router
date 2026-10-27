@@ -1,0 +1,23 @@
+baseURL = "https://wumpkit-go.github.io/router/"
+locale = "en-us"
+title = "Wumpkit Router Documentation"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+    [markup.goldmark.parser]
+      [markup.goldmark.parser.attribute]
+        block = true
+        title = true
+  [markup.highlight]
+    codeFences = true
+    guessSyntax = true
+    lineNos = false
+    noClasses = false
+
+[params]
+  description = "A high-performance command and interaction router for Wumpkit"
+  repoURL = "https://github.com/wumpkit-go/router"
+  wikiURL = "https://github.com/wumpkit-go/router/wiki"
+  version = "v1.0.0"
