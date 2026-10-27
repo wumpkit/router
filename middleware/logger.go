@@ -3,8 +3,8 @@ package middleware
 import (
 	"time"
 
-	"github.com/wumpkit-go/router"
-	"github.com/wumpkit-go/wumpkit"
+	"github.com/wumpkit/router"
+	"github.com/wumpkit/wumpkit"
 )
 
 // Logging returns a middleware that logs command executions and duration with structured attributes.

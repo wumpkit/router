@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/wumpkit-go/wumpkit"
+	"github.com/wumpkit/wumpkit"
 )
 
 func buildSlashCommand(cmd ChatCommand) (wumpkit.ApplicationCommand, bool) {

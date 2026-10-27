@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/wumpkit-go/router"
+	"github.com/wumpkit/router"
 )
 
 type RoleSelectMenuCommand struct {

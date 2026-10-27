@@ -7,9 +7,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/wumpkit-go/router"
-	"github.com/wumpkit-go/router/middleware"
-	"github.com/wumpkit-go/wumpkit"
+	"github.com/wumpkit/router"
+	"github.com/wumpkit/router/middleware"
+	"github.com/wumpkit/wumpkit"
 )
 
 func TestMiddleware_Logging(t *testing.T) {

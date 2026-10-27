@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/wumpkit-go/router"
+	"github.com/wumpkit/router"
 )
 
 type UserProfileCommand struct {
@@ -65,7 +65,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/wumpkit-go/router"
+	"github.com/wumpkit/router"
 )
 
 type QuoteMessageCommand struct {

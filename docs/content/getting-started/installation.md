@@ -20,7 +20,7 @@ go version
 In your bot project directory, run:
 
 ```bash
-go get github.com/wumpkit-go/router
+go get github.com/wumpkit/router
 ```
 
-This will automatically add `github.com/wumpkit-go/router` and its dependency `github.com/wumpkit-go/wumpkit` to your `go.mod` file.
+This will automatically add `github.com/wumpkit/router` and its dependency `github.com/wumpkit/wumpkit` to your `go.mod` file.

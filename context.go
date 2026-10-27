@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/wumpkit-go/wumpkit"
+	"github.com/wumpkit/wumpkit"
 )
 
 // context represents unified execution context for all commands
@@ -958,4 +958,3 @@ var (
 	_ Context = (*SelectMenuCommandContext)(nil)
 	_ Context = (*ModalCommandContext)(nil)
 )
-

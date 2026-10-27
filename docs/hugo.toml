@@ -1,4 +1,4 @@
-baseURL = "https://wumpkit-go.github.io/router/"
+baseURL = "https://wumpkit.github.io/router/"
 locale = "en-us"
 title = "Wumpkit Router Documentation"
 
@@ -18,6 +18,6 @@ title = "Wumpkit Router Documentation"
 
 [params]
   description = "A high-performance command and interaction router for Wumpkit"
-  repoURL = "https://github.com/wumpkit-go/router"
-  wikiURL = "https://github.com/wumpkit-go/router/wiki"
+  repoURL = "https://github.com/wumpkit/router"
+  wikiURL = "https://github.com/wumpkit/router/wiki"
   version = "v1.0.0"

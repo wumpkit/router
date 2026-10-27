@@ -3,7 +3,7 @@ package router
 import (
 	"context"
 
-	"github.com/wumpkit-go/wumpkit"
+	"github.com/wumpkit/wumpkit"
 )
 
 // commandhandler executes a command in the middleware chain
@@ -267,4 +267,3 @@ func ExtractCommonConfig(cmd any) CommonConfig {
 		return CommonConfig{}
 	}
 }
-

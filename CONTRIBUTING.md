@@ -17,7 +17,7 @@ Small changes, such as typo corrections or minor documentation updates, can be s
 
 ### For Larger Changes
 For significant contributions, such as new features, refactors, or performance optimizations:
-1. Check the [issue tracker](https://github.com/wumpkit-go/router/issues) and [discussions](https://github.com/wumpkit-go/router/discussions) to ensure your proposed change hasn't already been reported or discussed.
+1. Check the [issue tracker](https://github.com/wumpkit/router/issues) and [discussions](https://github.com/wumpkit/router/discussions) to ensure your proposed change hasn't already been reported or discussed.
 2. If no existing issue or discussion covers your proposal, create a new issue or start a discussion to outline your idea and engage with maintainers and the community.
 
 ### Branching Strategy

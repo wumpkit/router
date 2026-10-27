@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/wumpkit-go/router"
+	"github.com/wumpkit/router"
 )
 
 // cooldownWithStore creates a middleware enforcing rate limits via a custom CooldownStore

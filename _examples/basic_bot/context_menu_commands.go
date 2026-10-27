@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/wumpkit-go/router"
-	"github.com/wumpkit-go/wumpkit"
+	"github.com/wumpkit/router"
+	"github.com/wumpkit/wumpkit"
 )
 
 // UserAvatarCommand allows users to right-click any user -> Apps -> "View Avatar"

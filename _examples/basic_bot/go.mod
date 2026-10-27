@@ -1,10 +1,10 @@
 module basic_bot
 
-go 1.25.0
+go 1.26.0
 
 require (
-	github.com/wumpkit-go/router v0.0.0
-	github.com/wumpkit-go/wumpkit v1.0.0
+	github.com/wumpkit/router v0.0.0
+	github.com/wumpkit/wumpkit v1.0.1
 )
 
 require (
@@ -12,4 +12,4 @@ require (
 	github.com/klauspost/compress v1.18.6 // indirect
 )
 
-replace github.com/wumpkit-go/router => ../../
+replace github.com/wumpkit/router => ../../

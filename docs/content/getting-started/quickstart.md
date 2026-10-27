@@ -20,9 +20,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/wumpkit-go/router"
-	"github.com/wumpkit-go/router/middleware"
-	"github.com/wumpkit-go/wumpkit"
+	"github.com/wumpkit/router"
+	"github.com/wumpkit/router/middleware"
+	"github.com/wumpkit/wumpkit"
 )
 
 // 1. define the command struct

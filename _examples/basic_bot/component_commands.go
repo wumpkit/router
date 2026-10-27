@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wumpkit-go/router"
-	"github.com/wumpkit-go/wumpkit"
+	"github.com/wumpkit/router"
+	"github.com/wumpkit/wumpkit"
 )
 
 // MenuCommand sends an interactive component showcase containing buttons
@@ -47,7 +47,7 @@ func (c *MenuCommand) Run(ctx router.Context) error {
 		Build()
 
 	btnLink := wumpkit.NewButtonBuilder().
-		SetURL("https://github.com/wumpkit-go/wumpkit").
+		SetURL("https://github.com/wumpkit/wumpkit").
 		SetLabel("Documentation").
 		SetStyle(wumpkit.ButtonStyleLink).
 		Build()
@@ -217,7 +217,7 @@ func (b *CounterButton) Run(ctx *router.ButtonCommandContext) error {
 		Build()
 
 	btnLink := wumpkit.NewButtonBuilder().
-		SetURL("https://github.com/wumpkit-go/wumpkit").
+		SetURL("https://github.com/wumpkit/wumpkit").
 		SetLabel("Documentation").
 		SetStyle(wumpkit.ButtonStyleLink).
 		Build()

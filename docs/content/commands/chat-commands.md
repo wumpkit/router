@@ -17,8 +17,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/wumpkit-go/router"
-	"github.com/wumpkit-go/wumpkit"
+	"github.com/wumpkit/router"
+	"github.com/wumpkit/wumpkit"
 )
 
 type KickCommand struct {

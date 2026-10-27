@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Enterprise Community & Security Governance**: Contributor Covenant 2.1 code of conduct, security disclosure policy, issue/PR templates, and comprehensive CI/CD pipelines.
 
 ### Changed
-- Bumped `github.com/wumpkit-go/wumpkit` dependency to `v1.0.0`.
+- Bumped `github.com/wumpkit/wumpkit` dependency to `v1.0.0`.
 - Standardized toolchain and matrix tests on Go 1.23, 1.24, and 1.25.
 
 ## [0.1.0] - 2026-08-27

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/wumpkit-go/router"
-	"github.com/wumpkit-go/wumpkit"
+	"github.com/wumpkit/router"
+	"github.com/wumpkit/wumpkit"
 )
 
 // PingCommand responds with the bot's current gateway latency and provides

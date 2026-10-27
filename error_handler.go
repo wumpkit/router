@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wumpkit-go/wumpkit"
+	"github.com/wumpkit/wumpkit"
 )
 
 // CommandErrorHandler handles command lifecycle errors and rejections.

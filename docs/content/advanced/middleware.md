@@ -9,14 +9,14 @@ Middlewares let you intercept command execution to add cross-cutting behavior li
 
 ## Built-In Middlewares
 
-The router package includes built-in middlewares under `github.com/wumpkit-go/router/middleware`.
+The router package includes built-in middlewares under `github.com/wumpkit/router/middleware`.
 
 ### 1. Panic Recovery
 
 Catches unexpected panics inside command handlers and converts them into errors instead of crashing your bot process:
 
 ```go
-import "github.com/wumpkit-go/router/middleware"
+import "github.com/wumpkit/router/middleware"
 
 r.Use(middleware.Recovery(logger))
 ```
@@ -59,7 +59,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/wumpkit-go/router"
+	"github.com/wumpkit/router"
 )
 
 func PerformanceTimer() router.Middleware {

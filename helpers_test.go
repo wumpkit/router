@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/wumpkit-go/wumpkit"
+	"github.com/wumpkit/wumpkit"
 )
 
 type mockCommand struct {

@@ -1,10 +1,10 @@
-module github.com/wumpkit-go/router
+module github.com/wumpkit/router
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/stretchr/testify v1.12.1
-	github.com/wumpkit-go/wumpkit v1.0.0
+	github.com/wumpkit/wumpkit v1.0.1
 )
 
 require (

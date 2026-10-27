@@ -1,12 +1,12 @@
 # Wumpkit Router
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/wumpkit-go/router.svg)](https://pkg.go.dev/github.com/wumpkit-go/router)
-[![Release](https://img.shields.io/github/v/release/wumpkit-go/router?style=flat&color=3498db)](https://github.com/wumpkit-go/router/releases)
-[![CI Test](https://github.com/wumpkit-go/router/actions/workflows/test.yml/badge.svg)](https://github.com/wumpkit-go/router/actions/workflows/test.yml)
-[![CodeQL](https://github.com/wumpkit-go/router/actions/workflows/codeql.yml/badge.svg)](https://github.com/wumpkit-go/router/actions/workflows/codeql.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/wumpkit/router.svg)](https://pkg.go.dev/github.com/wumpkit/router)
+[![Release](https://img.shields.io/github/v/release/wumpkit/router?style=flat&color=3498db)](https://github.com/wumpkit/router/releases)
+[![CI Test](https://github.com/wumpkit/router/actions/workflows/test.yml/badge.svg)](https://github.com/wumpkit/router/actions/workflows/test.yml)
+[![CodeQL](https://github.com/wumpkit/router/actions/workflows/codeql.yml/badge.svg)](https://github.com/wumpkit/router/actions/workflows/codeql.yml)
 [![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
-A high-performance, idiomatic command and interaction routing engine for **[Wumpkit](https://github.com/wumpkit-go/wumpkit)**.
+A high-performance, idiomatic command and interaction routing engine for **[Wumpkit](https://github.com/wumpkit/wumpkit)**.
 
 > Requires **Go 1.25+**
 
@@ -26,7 +26,7 @@ A high-performance, idiomatic command and interaction routing engine for **[Wump
 ## Installation
 
 ```bash
-go get github.com/wumpkit-go/router
+go get github.com/wumpkit/router
 ```
 
 ## Quick Start
@@ -43,8 +43,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/wumpkit-go/router"
-	"github.com/wumpkit-go/wumpkit"
+	"github.com/wumpkit/router"
+	"github.com/wumpkit/wumpkit"
 )
 
 type PingCommand struct {
@@ -163,8 +163,8 @@ func (c *KickCommand) Run(ctx router.Context) error {
 
 ## Community and Support
 
-- **Discussions**: [GitHub Discussions](https://github.com/wumpkit-go/router/discussions)
-- **Bug Reports & Features**: [GitHub Issues](https://github.com/wumpkit-go/router/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/wumpkit/router/discussions)
+- **Bug Reports & Features**: [GitHub Issues](https://github.com/wumpkit/router/issues)
 - **Security**: Please review our [Security Policy](.github/SECURITY.md) for private vulnerability disclosure.
 - **Contributing**: Check [CONTRIBUTING.md](CONTRIBUTING.md) and [Code of Conduct](.github/CODE_OF_CONDUCT.md).
 
