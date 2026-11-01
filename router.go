@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"reflect"
 	"slices"
@@ -50,11 +49,20 @@ func WithClient(client *wumpkit.Client) Option {
 	}
 }
 
-// WithCommandErrorHandler sets a custom error handler for commands.
-func WithCommandErrorHandler(handler CommandErrorHandler) Option {
+// witherrorhandler sets a custom error handler function for the router
+func WithErrorHandler(handler ErrorHandler) Option {
 	return func(r *Router) {
 		if handler != nil {
 			r.errorHandler = handler
+		}
+	}
+}
+
+// withcommanderrorhandler sets a custom error handler for commands using the legacy interface
+func WithCommandErrorHandler(handler CommandErrorHandler) Option {
+	return func(r *Router) {
+		if handler != nil {
+			r.errorHandler = AdaptCommandErrorHandler(handler)
 		}
 	}
 }
@@ -96,7 +104,7 @@ type Router struct {
 
 	client             *wumpkit.Client
 	logger             wumpkit.Logger
-	errorHandler       CommandErrorHandler
+	errorHandler       ErrorHandler
 	prefixFunc         PrefixFunc
 	dynamicPrefixFunc  DynamicPrefixFunc
 	permissionResolver PermissionResolver
@@ -109,7 +117,7 @@ type Router struct {
 func New(options ...Option) *Router {
 	r := &Router{
 		Registry:     NewRegistry(),
-		errorHandler: NewDefaultCommandErrorHandler(),
+		errorHandler: DefaultErrorHandler,
 		prefixFunc: func(msg *wumpkit.Message) string {
 			return DefaultPrefix
 		},
@@ -120,7 +128,7 @@ func New(options ...Option) *Router {
 	}
 
 	if r.errorHandler == nil {
-		r.errorHandler = NewDefaultCommandErrorHandler()
+		r.errorHandler = DefaultErrorHandler
 	}
 
 	return r
@@ -142,9 +150,38 @@ func (r *Router) Logger() wumpkit.Logger {
 	return r.logger
 }
 
-// CommandErrorHandler returns the configured command error handler interface.
-func (r *Router) CommandErrorHandler() CommandErrorHandler {
+// errorhandler returns the configured error handler function
+func (r *Router) ErrorHandler() ErrorHandler {
 	return r.errorHandler
+}
+
+// onerror registers an error handler function on the router
+func (r *Router) OnError(handler ErrorHandler) *Router {
+	if handler != nil {
+		r.errorHandler = handler
+	}
+	return r
+}
+
+// seterrorhandler sets the error handler function on the router
+func (r *Router) SetErrorHandler(handler ErrorHandler) *Router {
+	return r.OnError(handler)
+}
+
+// commanderrorhandler returns the configured command error handler interface adapter
+func (r *Router) CommandErrorHandler() CommandErrorHandler {
+	return &commandErrorHandlerAdapter{handler: r.errorHandler}
+}
+
+func (r *Router) handleError(ctx Context, err error) {
+	if err == nil {
+		return
+	}
+	if r.errorHandler != nil {
+		r.errorHandler(ctx, err)
+		return
+	}
+	DefaultErrorHandler(ctx, err)
 }
 
 // use appends middlewares to the execution pipeline
@@ -310,7 +347,7 @@ func (r *Router) HandleMessage(ctx context.Context, e wumpkit.MessageCreateEvent
 	}
 
 	if excluded, ok := r.checkContextExclusion(cmd, msgCtx); ok {
-		r.errorHandler.OnContextExcluded(msgCtx, excluded)
+		r.handleError(msgCtx, &ContextExcludedError{Excluded: excluded})
 		return
 	}
 
@@ -324,9 +361,16 @@ func (r *Router) HandleMessage(ctx context.Context, e wumpkit.MessageCreateEvent
 	argValues, bindErr := r.bindMessageArgs(cmd, parsedInput, msg)
 	if bindErr.errType != bindErrNone {
 		if bindErr.errType == bindErrInvalid {
-			r.errorHandler.OnInvalidArgument(msgCtx, bindErr.name, bindErr.argType, bindErr.val)
+			r.handleError(msgCtx, &InvalidArgumentError{
+				Name:     bindErr.name,
+				Expected: bindErr.argType,
+				Received: bindErr.val,
+			})
 		} else {
-			r.errorHandler.OnMissingArgument(msgCtx, bindErr.name, bindErr.argType)
+			r.handleError(msgCtx, &MissingArgumentError{
+				Name:     bindErr.name,
+				Expected: bindErr.argType,
+			})
 		}
 		return
 	}
@@ -584,7 +628,7 @@ func (r *Router) handleChatInputInteraction(
 	}
 
 	if excluded, ok := r.checkContextExclusion(targetCmd, slashCtx); ok {
-		r.errorHandler.OnContextExcluded(slashCtx, excluded)
+		r.handleError(slashCtx, &ContextExcludedError{Excluded: excluded})
 		return
 	}
 
@@ -613,7 +657,7 @@ func (r *Router) handleUserContextMenuCommandInteraction(
 	}
 
 	if excluded, ok := r.checkContextExclusion(cmd, uCtx); ok {
-		r.errorHandler.OnContextExcluded(uCtx, excluded)
+		r.handleError(uCtx, &ContextExcludedError{Excluded: excluded})
 		return
 	}
 
@@ -642,7 +686,7 @@ func (r *Router) handleMessageContextMenuCommandInteraction(
 	}
 
 	if excluded, ok := r.checkContextExclusion(cmd, mCtx); ok {
-		r.errorHandler.OnContextExcluded(mCtx, excluded)
+		r.handleError(mCtx, &ContextExcludedError{Excluded: excluded})
 		return
 	}
 
@@ -745,7 +789,7 @@ func (r *Router) dispatchButtonInteraction(
 	}
 
 	if excluded, ok := r.checkContextExclusion(bCmd, bCtx); ok {
-		r.errorHandler.OnContextExcluded(bCtx, excluded)
+		r.handleError(bCtx, &ContextExcludedError{Excluded: excluded})
 		return
 	}
 
@@ -786,7 +830,7 @@ func (r *Router) dispatchSelectMenuInteraction(
 	}
 
 	if excluded, ok := r.checkContextExclusion(sCmd, sCtx); ok {
-		r.errorHandler.OnContextExcluded(sCtx, excluded)
+		r.handleError(sCtx, &ContextExcludedError{Excluded: excluded})
 		return
 	}
 
@@ -827,7 +871,7 @@ func (r *Router) handleModalSubmitInteraction(
 	}
 
 	if excluded, ok := r.checkContextExclusion(cmd, modalCtx); ok {
-		r.errorHandler.OnContextExcluded(modalCtx, excluded)
+		r.handleError(modalCtx, &ContextExcludedError{Excluded: excluded})
 		return
 	}
 
@@ -870,14 +914,14 @@ func (r *Router) executePipeline(ctx Context, cmd any, runner func(ctx Context) 
 
 	if cfg.UserPermissions != 0 && ctx.InGuild() {
 		if missing := ctx.UserPermissions().Missing(cfg.UserPermissions); missing != 0 {
-			r.errorHandler.OnUserPermissionMissing(ctx, missing)
+			r.handleError(ctx, &UserPermissionMissingError{Missing: missing})
 			return
 		}
 	}
 
 	if cfg.AppPermissions != 0 && ctx.InGuild() {
 		if missing := ctx.AppPermissions().Missing(cfg.AppPermissions); missing != 0 {
-			r.errorHandler.OnAppPermissionMissing(ctx, missing)
+			r.handleError(ctx, &AppPermissionMissingError{Missing: missing})
 			return
 		}
 	}
@@ -913,13 +957,7 @@ func (r *Router) executePipeline(ctx Context, cmd any, runner func(ctx Context) 
 	}()
 
 	if err != nil {
-		var cdErr *CooldownError
-		if errors.As(err, &cdErr) {
-			r.errorHandler.OnCooldown(ctx, cdErr.Remaining, cdErr.Scope)
-			return
-		}
-
-		r.errorHandler.OnCommandError(ctx, cmd, err)
+		r.handleError(ctx, &CommandError{Command: cmd, Err: err})
 	}
 }
 

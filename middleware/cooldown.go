@@ -8,15 +8,12 @@ import (
 	"github.com/wumpkit/router"
 )
 
-// cooldownWithStore creates a middleware enforcing rate limits via a custom CooldownStore
+// cooldownwithstore creates a middleware enforcing rate limits via a custom cooldown store
 func CooldownWithStore(
 	store router.CooldownStore,
-	customHandler ...router.CommandErrorHandler,
+	customHandler ...any,
 ) router.Middleware {
-	var eh router.CommandErrorHandler
-	if len(customHandler) > 0 {
-		eh = customHandler[0]
-	}
+	eh := resolveCooldownHandler(customHandler)
 
 	return func(next router.CommandHandler) router.CommandHandler {
 		return func(ctx router.Context) error {
@@ -48,7 +45,10 @@ func CooldownWithStore(
 				}
 				if !allowed {
 					if eh != nil {
-						eh.OnCooldown(ctx, remaining, rule.Scope)
+						eh(ctx, &router.CooldownError{
+							Remaining: remaining,
+							Scope:     rule.Scope,
+						})
 						return nil
 					}
 					return &router.CooldownError{
@@ -63,13 +63,9 @@ func CooldownWithStore(
 	}
 }
 
-// Cooldown creates a middleware enforcing command execution rate limits using the Generic Cell Rate Algorithm (GCRA).
-// When a cooldown is exceeded, it notifies the customHandler (if provided) or returns a *router.CooldownError.
-func Cooldown(customHandler ...router.CommandErrorHandler) router.Middleware {
-	var eh router.CommandErrorHandler
-	if len(customHandler) > 0 {
-		eh = customHandler[0]
-	}
+// cooldown creates a middleware enforcing command execution rate limits using gcra
+func Cooldown(customHandler ...any) router.Middleware {
+	eh := resolveCooldownHandler(customHandler)
 
 	var (
 		// buckets stores theoretical arrival time (tat) in unix nanoseconds for each active bucket
@@ -123,7 +119,10 @@ func Cooldown(customHandler ...router.CommandErrorHandler) router.Middleware {
 					if exceeded {
 						mu.Unlock()
 						if eh != nil {
-							eh.OnCooldown(ctx, remaining, rule.Scope)
+							eh(ctx, &router.CooldownError{
+								Remaining: remaining,
+								Scope:     rule.Scope,
+							})
 							return nil
 						}
 						return &router.CooldownError{
@@ -162,7 +161,10 @@ func Cooldown(customHandler ...router.CommandErrorHandler) router.Middleware {
 				if exceeded {
 					mu.Unlock()
 					if eh != nil {
-						eh.OnCooldown(ctx, remaining, rule.Scope)
+						eh(ctx, &router.CooldownError{
+							Remaining: remaining,
+							Scope:     rule.Scope,
+						})
 						return nil
 					}
 					return &router.CooldownError{
@@ -237,7 +239,23 @@ func getCooldownBucketKey(
 		return cmdName + ":m:" + gID + ":" + ctx.Author().ID.String() + ":" + idxStr
 	case router.CooldownScopeGlobal:
 		return cmdName + ":global:" + idxStr
-	default: // CooldownScopeUser
+	default: // cooldownscopeuser
 		return cmdName + ":u:" + ctx.Author().ID.String() + ":" + idxStr
+	}
+}
+
+func resolveCooldownHandler(customHandler []any) router.ErrorHandler {
+	if len(customHandler) == 0 || customHandler[0] == nil {
+		return nil
+	}
+	switch h := customHandler[0].(type) {
+	case router.ErrorHandler:
+		return h
+	case func(ctx router.Context, err error):
+		return router.ErrorHandler(h)
+	case router.CommandErrorHandler:
+		return router.AdaptCommandErrorHandler(h)
+	default:
+		return nil
 	}
 }
