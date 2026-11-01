@@ -88,7 +88,7 @@ func PerformanceTimer() router.Middleware {
 If you need lightweight listeners before or after commands without wrapping the execution chain, use `r.Before()` and `r.After()`:
 
 ```go
-// runs before any command executes. Return an error to stop execution.
+// runs before any command executes, return error to stop execution
 r.Before(func(ctx router.Context) error {
 	// example: verify if command is restricted
 	return nil

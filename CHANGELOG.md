@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Replaced OOP error handler interface with idiomatic Go error values and `ErrorHandler` function (`type ErrorHandler func(ctx Context, err error)`)
+- Added strongly-typed error values: `*MissingArgumentError`, `*InvalidArgumentError`, `*UserPermissionMissingError`, `*AppPermissionMissingError`, `*ContextExcludedError`, `*CommandError`, `*CooldownError`, and sentinel `ErrNSFWRequired`
+- Added `r.OnError(...)` and `WithErrorHandler(...)` for registering error handlers with support for standard `errors.As` and `errors.Is`
+- Maintained backward compatibility for existing `CommandErrorHandler` implementations via automatic adapter
+
 ## [1.0.0] - 2026-10-26
 
 ### Added
